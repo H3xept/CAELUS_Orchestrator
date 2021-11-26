@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <div class="row">
+        <div class="d-flex justify-content-center">
+            <h2>{% block title %}Login{% endblock %}</h2>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="d-flex justify-content-center">
+        <form action="/login" method="POST">
+            <div class="mb-3">
+              <label for="username" class="form-label">Username</label>
+              <input type="text" class="form-control" id="username" name="username" aria-describedby="usernameHelp">
+              <div id="usernameHelp" class="form-text">Contact leonardo.cascianelli.2017@uni.strath.ac.uk to obtain an username.</div>
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input type="password" name="password" class="form-control" id="password">
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+    </div>
+</div>
+{% endblock %}

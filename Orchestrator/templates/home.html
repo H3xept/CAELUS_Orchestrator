@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <div class="row">
+        <div class="d-flex justify-content-left">
+            <h2>{% block title %}Dashboard{% endblock %}</h2>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <h3> Active processes </h3>
+    {% if processes['active'] %}
+        {% for pid, status in processes['active'].items() %}
+            <ul>
+                <li>PID: {{pid}} - {{status}}</li>
+            </ul>
+        {% endfor %}
+    {% else %}
+        <h4>No active processes :(</h4>
+    {% endif %}
+
+    <h3> Old processes </h3>
+    {% if processes['old'] %}
+        {% for pid, status in processes['old'].items() %}
+            <ul>
+                <li>PID: {{pid}} - {{status}}</li>
+            </ul>
+        {% endfor %}
+    {% else %}
+        <h4>No old processes :(</h4>
+    {% endif %}
+
+    <form action="/new_process" method="POST">
+        <button type="submit">New Process</button>
+    </form>
+{% endblock %}
