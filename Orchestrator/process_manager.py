@@ -1,4 +1,5 @@
 import enum
+from os import EX_CANTCREAT
 import uuid
 from typing import Dict
 import logging
@@ -9,43 +10,44 @@ from random import random
 from math import floor
 
 class Process(Thread):
-    CREATED, RUNNING, ERROR, TERMINATED = 0,1,2,3
+    CREATED, RUNNING, ERROR, TERMINATED, HALTED = 0,1,2,3,4
     @staticmethod
     def status_to_string(s):
-        return {i:v for i,v in enumerate(['CREATED', 'RUNNING', 'ERROR', 'TERMINATED'])}[s]
+        return {i:v for i,v in enumerate(['CREATED', 'RUNNING', 'ERROR', 'TERMINATED', 'HALTED'])}[s]
 
-    def __init__(self, stop_condition, docker_image, mission_file_path, logger=logging.getLogger()):
+    def __init__(self, docker_image, mission_file_path, logger=logging.getLogger()):
         super().__init__()
         self.status = Process.CREATED
         self.__mission_file_path = mission_file_path
         self.__docker_image = docker_image
         self.__error = None
         self.__created_at = time.time()
-        self.__force_stop = stop_condition
         self.__logger = logger
+        self.__should_stop = False
 
+    def halt(self):
+        self.__should_stop = True
+        
     def __simulate_docker(self):
         def wait():
-            time.sleep(floor(10 * random()) + 1)
+            time.sleep(floor(10 * random()) + 10)
         t = Thread(target=wait)
         t.start()
         while t.is_alive():
             t.join(timeout=0.5)
-            self.__force_stop.acquire()
-            if self.__force_stop.wait(timeout=0.5):
-                print(f'Process {self} forcibly exited.')
-                break
-            self.__force_stop.release()
-        print(f'Process {self} terminated')
+            if self.__should_stop:
+                self.__logger.info(f'Process {self} forcibly exited.')
+                return Process.HALTED
+        self.__logger.info(f'Process {self} terminated')
+        return Process.TERMINATED
 
     def run(self):
         try:
-            print(f'Starting process {self} with image {self.__docker_image}')
+            self.__logger.info(f'Starting process {self} with image {self.__docker_image}')
             self.status = Process.RUNNING
-            self.__simulate_docker()
-            self.status = Process.TERMINATED
+            self.status = self.__simulate_docker()
         except Exception as e:
-            print(f'{self} errored out during startup')
+            self.__logger.info(f'{self} errored out during startup')
             self.status = Process.ERROR
             self.__error = e
 
@@ -66,7 +68,7 @@ class Process(Thread):
 
 class ProcessManager():
 
-    def __init__(self, max_concurrent_processes = 10):
+    def __init__(self, max_concurrent_processes = 10, logger=logging.getLogger()):
         self.__max_concurrent_processes = max_concurrent_processes
         self.__ps_running = 0
         self.__ps_queue = Queue()
@@ -77,28 +79,26 @@ class ProcessManager():
         self.__monitor_thread.name = 'Process monitor'
         self.__monitor_thread.daemon = True
         self.__monitor_thread.start()
+        self.__logger = logger
     
     def __start_new_process(self, docker_image, mission_file_path):
-        condition = Condition()
-        p = Process(condition, docker_image, mission_file_path)
+        p = Process(docker_image, mission_file_path)
         p.daemon = True
         p.name = f'Simulation_{mission_file_path}'
         p.start()
-        self.__active_ps[uuid.uuid4()] = p
+        self.__active_ps[str(uuid.uuid4())] = p
 
     def halt_process(self, process_id):
         if process_id not in self.__active_ps:
-            print(f'Tried to halt a non-existing process ({process_id})')
+            self.__logger.warn(f'Tried to halt a non-existing process ({process_id})')
             return
+        self.__logger.info(f'Sending force stop command for process {process_id}')
         p = self.__active_ps[process_id]
-        condition = p.get_force_stop_condition()
-        print(f'Sending force stop command for process {process_id}')
-        condition.acquire()
-        condition.notify()
-        condition.release()
+        p.halt()
+
 
     def schedule_process(self, docker_image, mission_file_path):
-        print(f'Enqueueing new process (docker_img: {docker_image}, mission: {mission_file_path})')
+        self.__logger.info(f'Enqueueing new process (docker_img: {docker_image}, mission: {mission_file_path})')
         self.__ps_queue.put((docker_image, mission_file_path))
 
     def reschedule_process(self, old_p):
@@ -109,12 +109,12 @@ class ProcessManager():
             return
         try:
             docker_img, mission_fp = self.__ps_queue.get_nowait()
-            print(f'Dequeued new process (docker_img: {docker_img}, mission: {mission_fp})')
+            self.__logger.info(f'Dequeued new process (docker_img: {docker_img}, mission: {mission_fp})')
             self.__start_new_process(docker_img, mission_fp)
         except Empty as _:
             pass
         except Exception as e:
-            print(e)
+            self.__logger.info(e)
 
     def monitor(self):
 
@@ -128,10 +128,14 @@ class ProcessManager():
                     to_delete.append(pid)
                 elif p.status == Process.ERROR:
                     self.__old_ps[pid] = p
-                    print(f'Process {pid} errored out. Rescheduling...')
-                    print(f'\tError: {p.get_error()}')
+                    self.__logger.info(f'Process {pid} errored out. Rescheduling...')
+                    self.__logger.info(f'\tError: {p.get_error()}')
                     to_delete.append(pid)
                     self.reschedule_process(p)
+                elif p.status == Process.HALTED:
+                    self.__logger.info(f'Process {pid} has been halted.')
+                    to_delete.append(pid)
+                    self.__old_ps[pid] = p
                 elif p.status == Process.RUNNING:
                     ps_running += 1
             for d in to_delete:

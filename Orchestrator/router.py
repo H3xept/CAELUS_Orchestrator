@@ -12,26 +12,39 @@ from .auth import jwt
 router = Blueprint('router', __name__, template_folder='./templates')
 router.ps = ProcessManager(max_concurrent_processes=10)
 
-@router.route("/home")
+HOME_GET = '/home'
+LOGIN_GET = '/'
+
+NEW_PROCESS_POST = '/new_process'
+TERMINATE_PROCESS_POST = '/terminate/<pid>'
+LOGIN_POST = '/login'
+
+@router.route(HOME_GET)
 @jwt_required()
 def home():
     return render_template('home.html', processes=router.ps.processes_info())
 
-@router.post('/new_process')
+@router.post(NEW_PROCESS_POST)
 def new_process():
     ps:ProcessManager = router.ps
     ps.schedule_process('test','test_mission')
-    return redirect('/home')
+    return redirect(HOME_GET)
+
+@router.post(TERMINATE_PROCESS_POST)
+def stop_process(pid):
+    ps:ProcessManager = router.ps
+    ps.halt_process(pid)
+    return redirect(HOME_GET)
 
 @jwt.unauthorized_loader
 def unauthorised(_):
-    redirect('/')
+    redirect(LOGIN_GET)
 
-@router.route("/")
+@router.route(LOGIN_GET)
 def login_get():
     return render_template('login.html')
 
-@router.post("/login")
+@router.post(LOGIN_POST)
 def login_post():
     try:
         data = {
@@ -43,14 +56,14 @@ def login_post():
         if user is not None:
             print(f'Login successful for user {data["username"]}')
             token = create_access_token(user.jwt_payload())
-            local_res = make_response(redirect('/home'))
+            local_res = make_response(redirect(HOME_GET))
             local_res.set_cookie('access_token_cookie', token, expires=datetime.datetime.utcnow() + datetime.timedelta(hours=24))
         else:
-            local_res = redirect('/')
+            local_res = redirect(LOGIN_GET)
             return local_res
         return local_res
     except Exception as e:
         print(e)
-        return redirect('/')
+        return redirect(LOGIN_GET)
     
 

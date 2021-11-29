@@ -13,7 +13,7 @@
     {% if processes['active'] %}
         {% for pid, status in processes['active'].items() %}
             <ul>
-                <li>PID: {{pid}} - {{status}}</li>
+                <li>PID: {{pid}} - {{status}} <button onclick="terminate( '{{ pid }}' )"> Halt </button></li>
             </ul>
         {% endfor %}
     {% else %}
@@ -34,4 +34,14 @@
     <form action="/new_process" method="POST">
         <button type="submit">New Process</button>
     </form>
+
+    <script>
+        async function terminate(pid) {
+            console.log("Terminating ", pid)
+            const response = await fetch('/terminate/'+pid, {
+            method: 'post',
+            body: {}
+            });
+        }
+    </script>
 {% endblock %}
