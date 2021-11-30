@@ -63,9 +63,10 @@ paths:
     post:
       tags:
         - Simulation
-      description: Create a new mission for the logged in account
+      description: Create a new mission for the logged in account.
       requestBody:
         required: true
+        description: The body of this request should contain the JSON file with the information required by the simulator.
         content:
           application/json:
             schema:
