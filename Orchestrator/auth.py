@@ -1,5 +1,4 @@
 from flask_jwt_extended import JWTManager
-
 from passlib.context import CryptContext
 
 crypto_context = None

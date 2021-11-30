@@ -17,6 +17,7 @@ services:
     volumes:
       - mongo-data:/data/db
       - mongo-configdb:/data/configdb
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     command: mongod --port 27017 --bind_ip 0.0.0.0
 volumes:
   mongo-data:

@@ -55,13 +55,22 @@ def get_jobs():
 def unauthorised(_):
     return make_response(jsonify({}), 401)
 
-# @router.post(REGISTER_POST)
-# def register_user():
-#     cc = get_crypto_context()
-#     data_json = request.get_json()
-#     if store_new_user(mongo_db, data_json['username'], cc.hash(data_json['password'])):
-#         return make_response(jsonify({}), 200)
-#     return make_response(jsonify({}), 400)
+@router.post(REGISTER_POST)
+@jwt_required()
+def register_user():
+    
+    is_admin = get_jwt_identity()['username'] == 'admin'
+    if not is_admin:
+        return make_response(jsonify({'msg':'You must be logged in as admin to register new users!'}), 401)
+
+    cc = get_crypto_context()
+    data_json = request.get_json()
+    pwd_hash = cc.hash(data_json['password'])
+    if store_new_user(mongo_db, data_json['username'], pwd_hash):
+        return make_response(jsonify({}), 200)
+    return make_response(jsonify({}), 400)
+
+import traceback
 
 @router.post(LOGIN_POST)
 def login_post():
@@ -78,16 +87,15 @@ def login_post():
             token_expiry = datetime.datetime.utcnow() + datetime.timedelta(hours=24)
             local_res = make_response(jsonify({
                 'access_token':token,
-                'expires2':token_expiry
+                'expires':token_expiry
             }), 200)
             local_res.set_cookie('access_token_cookie', token, expires=token_expiry)
         else:
             local_res = make_response(jsonify({}), 401)
         return local_res
     except Exception as e:
-        print(e)
         return make_response(jsonify({
-                'msg': 'Something went wrong'
+                'msg': str(traceback.format_exc())
             }), 500)
     
 
