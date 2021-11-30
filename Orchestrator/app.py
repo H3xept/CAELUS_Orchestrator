@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from .auth import setup_auth
 
 app = Flask(__name__)
@@ -10,5 +10,10 @@ app.config['JWT_TOKEN_LOCATION'] = ["headers", "cookies"]
 from .User import User
 setup_auth(app)
 from .router import router
+
+@app.route('/docs')
+def get_docs():
+    print('sending docs')
+    return render_template('swaggerui.html')
 
 app.register_blueprint(router, url_prefix='/')

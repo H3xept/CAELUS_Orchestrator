@@ -19,7 +19,7 @@ JOBS_GET = '/jobs'
 REGISTER_POST = '/register'
 
 NEW_PROCESS_POST = '/new_mission'
-TERMINATE_PROCESS_POST = '/terminate/<pid>'
+HALT_PROCESS_POST = '/halt/<pid>'
 LOGIN_POST = '/login'
 @router.post(NEW_PROCESS_POST)
 
@@ -39,7 +39,7 @@ def new_process():
     else:
         return make_response(jsonify({}), 400)
 
-@router.post(TERMINATE_PROCESS_POST)
+@router.post(HALT_PROCESS_POST)
 @jwt_required()
 def stop_process(pid):
     # Check if mission is owned by user / if user is admin
