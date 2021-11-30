@@ -1,6 +1,5 @@
 from flask import Flask
 from .auth import setup_auth
-from flask_jwt import jwt_required
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

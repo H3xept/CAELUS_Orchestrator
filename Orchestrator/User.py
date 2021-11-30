@@ -1,4 +1,3 @@
-from sqlalchemy.orm import relationship
 from .auth import get_crypto_context
 from .mongo import retrieve_user
 

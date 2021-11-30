@@ -55,19 +55,18 @@ def get_jobs():
 def unauthorised(_):
     return make_response(jsonify({}), 401)
 
-@router.post(REGISTER_POST)
-def register_user():
-    cc = get_crypto_context()
-    data_json = request.get_json()
-    if store_new_user(mongo_db, data_json['username'], cc.hash(data_json['password'])):
-        return make_response(jsonify({}), 200)
-    return make_response(jsonify({}), 400)
+# @router.post(REGISTER_POST)
+# def register_user():
+#     cc = get_crypto_context()
+#     data_json = request.get_json()
+#     if store_new_user(mongo_db, data_json['username'], cc.hash(data_json['password'])):
+#         return make_response(jsonify({}), 200)
+#     return make_response(jsonify({}), 400)
 
 @router.post(LOGIN_POST)
 def login_post():
     try:
         data_json = request.get_json()
-        print(data_json)
         data = {
             'username':data_json['username'],
             'password':data_json['password']
