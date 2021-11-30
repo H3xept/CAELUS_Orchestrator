@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    ports:
+    - "5000:5000"
+    volumes:
+    - .:/opt
+    links:
+    - mongo
+    depends_on:
+    - mongo
+  mongo:
+    image: mongo
+    ports:
+     - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - mongo-configdb:/data/configdb
+    command: mongod --port 27017 --bind_ip 0.0.0.0
+volumes:
+  mongo-data:
+  mongo-configdb:

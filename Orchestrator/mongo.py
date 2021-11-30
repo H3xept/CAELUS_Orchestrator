@@ -1,6 +1,6 @@
 import pymongo
 
-client = pymongo.MongoClient("mongodb://localhost:27017/")
+client = pymongo.MongoClient("mongodb://mongo/")
 
 FLIGHT_DATA = 'FLIGHT_DATA'
 USERS = 'USERS'
