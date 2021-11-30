@@ -2,20 +2,36 @@ import pymongo
 
 client = pymongo.MongoClient("mongodb://localhost:27017/")
 
+FLIGHT_DATA = 'FLIGHT_DATA'
+USERS = 'USERS'
+
 def store_new_process(database, process):
-    user_root = database[process.get_issuer()]
-    user_root.insert_one(process.to_dict())
+    flight_data = database[FLIGHT_DATA]
+    flight_data.insert_one(process.to_dict())
 
 def update_process_status(database, process):
-    user_root = database[process.get_issuer()]
+    flight_data = database[FLIGHT_DATA]
     query = {'$set':{'status':process.get_status(), 'status_str':process.get_status_string()}}
-    user_root.update_one({'id':process.get_id()}, query)
+    flight_data.update_one({'id':process.get_id()}, query)
 
 def get_processes_for_user(database, user_id):
-    user_root = database[user_id]
-    return user_root.find({}, {'_id': False})
+    flight_data = database[FLIGHT_DATA]
+    return flight_data.find({'issuer_id':user_id}, {'_id': False})
 
 def cleanup_dangling_processes(database):
     # Set all running to halted
-    for c in database.list_collection_names():
-        database[c].update_many({'status':1}, {'$set':{'status':4}})
+    flight_data = database[FLIGHT_DATA]
+    ns = flight_data.update_many({'status':1}, {'$set':{'status':4}})
+    if ns.modified_count > 0:
+        print(f'Cleaned up {ns.modified_count} dangling processes')
+
+def store_new_user(database, username, password):
+    users = database[USERS]
+    if users.find_one({'username':username}):
+        return False
+    users.insert_one({'username':username, 'password':password})
+    return True
+
+def retrieve_user(database, username):
+    users = database[USERS]
+    return users.find_one({'username':username}, {'_id': False})

@@ -4,19 +4,18 @@ from flask.json import jsonify
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from .process_manager import ProcessManager
-import requests
 import datetime
 from .User import User
-from .auth import jwt
+from .auth import jwt, get_crypto_context
 from .helpers import validate_payload
-from .database import db
-from .mongo import client, get_processes_for_user
+from .mongo import client, get_processes_for_user, store_new_user
 
-mongo_db = client['FLIGHT_DATA']
+mongo_db = client['caelus']
 router = Blueprint('router', __name__, template_folder='./templates')
 router.ps = ProcessManager(mongo_db, max_concurrent_processes=10)
 
 JOBS_GET = '/jobs'
+REGISTER_POST = '/register'
 
 NEW_PROCESS_POST = '/new_mission'
 TERMINATE_PROCESS_POST = '/terminate/<pid>'
@@ -56,18 +55,27 @@ def get_jobs():
 def unauthorised(_):
     return make_response(jsonify({}), 401)
 
+@router.post(REGISTER_POST)
+def register_user():
+    cc = get_crypto_context()
+    data_json = request.get_json()
+    if store_new_user(mongo_db, data_json['username'], cc.hash(data_json['password'])):
+        return make_response(jsonify({}), 200)
+    return make_response(jsonify({}), 400)
+
 @router.post(LOGIN_POST)
 def login_post():
     try:
         data_json = request.get_json()
+        print(data_json)
         data = {
             'username':data_json['username'],
             'password':data_json['password']
         }
-        user = User.authenticate(data['username'], data['password'])
+        user = User.authenticate(mongo_db, data['username'], data['password'])
         if user is not None:
             print(f'Login successful for user {data["username"]}')
-            token = create_access_token(user.jwt_payload())
+            token = create_access_token(user)
             token_expiry = datetime.datetime.utcnow() + datetime.timedelta(hours=24)
             local_res = make_response(jsonify({
                 'access_token':token,
@@ -81,6 +89,6 @@ def login_post():
         print(e)
         return make_response(jsonify({
                 'msg': 'Something went wrong'
-            }, 500))
+            }), 500)
     
 

@@ -93,7 +93,8 @@ class Process(Thread):
             'docker_image': self.get_docker_image(),
             'mission_payload': self.get_mission_file_path(),
             'status': self.get_status(),
-            'status_str': self.get_status_string()
+            'status_str': self.get_status_string(),
+            'issuer_id': self.get_issuer()
         }
 
 class ProcessManager():
