@@ -34,5 +34,8 @@ def store_new_user(database, username, password):
 
 def retrieve_user(database, username):
     users = database[USERS]
-    print(f'Finding user with us: {username}')
     return users.find_one({'username':username}, {'_id': False})
+
+def retrieve_process(database, pid):
+    flight_data = database[FLIGHT_DATA]
+    return flight_data.find_one({'id':pid}, {'_id': False})

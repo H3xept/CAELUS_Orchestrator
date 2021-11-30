@@ -3,12 +3,13 @@ from flask.helpers import make_response, url_for
 from flask.json import jsonify
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from pymongo import database
 from .process_manager import ProcessManager
 import datetime
 from .User import User
 from .auth import jwt, get_crypto_context
 from .helpers import validate_payload
-from .mongo import client, get_processes_for_user, store_new_user
+from .mongo import client, get_processes_for_user, retrieve_process, store_new_user
 
 mongo_db = client['caelus']
 router = Blueprint('router', __name__, template_folder='./templates')
@@ -41,9 +42,18 @@ def new_process():
 @router.post(TERMINATE_PROCESS_POST)
 @jwt_required()
 def stop_process(pid):
+    # Check if mission is owned by user / if user is admin
+    user_id = get_jwt_identity()['username']
+    is_admin = user_id == 'admin'
+    mission_owned = retrieve_process(mongo_db, pid)
+    if not (is_admin or mission_owned):
+        return make_response(jsonify({'msg':'You do not own that mission.'}), 401)
+
     ps:ProcessManager = router.ps
-    ps.halt_process(pid)
-    return make_response(jsonify({}), 200)
+    if ps.halt_process(pid):
+        return make_response(jsonify({}), 200)
+    else:
+        return make_response(jsonify({'msg': 'Could not halt mission. (The mission might already have completed)'}), 400)
 
 @router.get(JOBS_GET)
 @jwt_required()

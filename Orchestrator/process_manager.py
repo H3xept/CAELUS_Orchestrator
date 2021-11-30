@@ -130,10 +130,11 @@ class ProcessManager():
     def halt_process(self, process_id):
         if process_id not in self.__active_ps:
             self.__logger.warn(f'Tried to halt a non-existing process ({process_id})')
-            return
+            return False
         self.__logger.info(f'Sending force stop command for process {process_id}')
         p = self.__active_ps[process_id]
         p.halt()
+        return True
 
 
     def schedule_process(self, docker_image, mission_file_path, issuer_id):
