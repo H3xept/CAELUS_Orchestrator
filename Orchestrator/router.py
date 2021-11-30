@@ -21,8 +21,12 @@ REGISTER_POST = '/register'
 NEW_PROCESS_POST = '/new_mission'
 HALT_PROCESS_POST = '/halt/<pid>'
 LOGIN_POST = '/login'
-@router.post(NEW_PROCESS_POST)
 
+@router.get('/')
+def index():
+    return redirect('/docs')
+    
+@router.post(NEW_PROCESS_POST)
 @jwt_required()
 def new_process():
     payload = request.get_json()
