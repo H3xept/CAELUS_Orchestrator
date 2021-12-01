@@ -84,14 +84,14 @@ class Process(Thread):
     def get_docker_image(self):
         return self.__docker_image
 
-    def get_mission_file_path(self):
+    def get_mission_data(self):
         return self.__mission_file_path
 
     def to_dict(self):
         return {
             'id': self.get_id(),
             'docker_image': self.get_docker_image(),
-            'mission_payload': self.get_mission_file_path(),
+            'mission_payload': self.get_mission_data(),
             'status': self.get_status(),
             'status_str': self.get_status_string(),
             'issuer_id': self.get_issuer()
@@ -120,7 +120,7 @@ class ProcessManager():
         update_process_status(self.__database, process)
 
     def __start_new_process(self, docker_image, mission_file_path, _id, issuer_id):
-        p = Process(_id, issuer_id, docker_image, str(mission_file_path), self)
+        p = Process(_id, issuer_id, docker_image, mission_file_path, self)
         p.daemon = True
         p.name = f'Simulation_{mission_file_path}'
         p.start()
@@ -144,7 +144,7 @@ class ProcessManager():
         return _id
 
     def reschedule_process(self, old_p):
-        self.schedule_process(old_p.get_docker_image(), old_p.get_mission_file_path(), old_p.get_issuer_id())
+        self.schedule_process(old_p.get_docker_image(), old_p.get_mission_data(), old_p.get_issuer_id())
     
     def __dequeue_ps(self):
         if self.__ps_running >= self.__max_concurrent_processes:

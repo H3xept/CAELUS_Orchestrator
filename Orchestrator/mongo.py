@@ -4,6 +4,7 @@ client = pymongo.MongoClient("mongodb://mongo/")
 
 FLIGHT_DATA = 'FLIGHT_DATA'
 USERS = 'USERS'
+SIM_OUT = 'SIM_OUT'
 
 def store_new_process(database, process):
     flight_data = database[FLIGHT_DATA]
@@ -39,3 +40,12 @@ def retrieve_user(database, username):
 def retrieve_process(database, pid):
     flight_data = database[FLIGHT_DATA]
     return flight_data.find_one({'id':pid}, {'_id': False})
+
+def user_owns_operation(database, user_id, operation_id):
+    flight_data = database[FLIGHT_DATA]
+    res = flight_data.find_one({'mission_payload.operation_id':operation_id, 'issuer_id':user_id})
+    return True if res is not None else False
+
+def get_simulation_data(database, operation_id):
+    sim_data = database[SIM_OUT]
+    return sim_data.find_one({'operation_id':operation_id}, {'_id': False})

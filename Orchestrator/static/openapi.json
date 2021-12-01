@@ -132,6 +132,57 @@ paths:
                     example: eyJ0eXAiOiJ...oQHfTjaqiT01JUpk_y0C46Mns
         '401':
           description: Not logged in
+  /simulation_data/{operation_id}:
+    get:
+      tags:
+        - Simulation
+      description: Retrieves the simulation data for a given operation
+      parameters:
+        - in: path
+          name: operation_id
+          schema:
+            type: string
+            example: 5c17c4d2-e878-4a47-a6a3-724f16f46ba2
+          required: true
+          description: UUID of the operation to retrieve information about.
+          
+      responses:
+        '200':
+          description: Successfully retrieved simulation data.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  battery_level:
+                    type: array
+                    items:
+                      type: number
+                      format: float
+                      example: [100, 99.9, 99.8]
+                  payload_temperature:
+                    type: array
+                    items:
+                      type: number
+                      format: float
+                      example: [5.0, 5.001, 5.002]
+                  aeroacoustic:
+                    type: array
+                    items:
+                      type: array
+                      items:
+                        type: number
+                        format: float
+                      example: [202751.4487, 635565.9294, 0, 14.58, 0.0, -0.00010678921514848534, 0.0005663992152687102, 0.9999998338939824, 0.0, -0.00010678921514848534, 0.0005663992152687102, 0.9999998338939824, 0.0, -0.00010678921514848534, 0.0005663992152687102, 0.9999998338939824, 0.0, -0.00010678921514848534, 0.0005663992152687102, 0.9999998338939824]
+                  flight_time:
+                    type: number
+                    format: float
+                    example: 419.636
+                    description: in seconds
+        '401':
+          description: Authentication failed -- Wrong credentials / User not registered.
+        '404':
+          description: There is a job associated with the given operation_id but no simulation data is present. This could mean that the simulation is still running.
   /jobs:
     get:
       tags:

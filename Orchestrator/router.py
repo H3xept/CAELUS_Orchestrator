@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, flash
+from flask import json
 from flask.helpers import make_response, url_for
 from flask.json import jsonify
 from flask_jwt_extended import create_access_token
@@ -9,7 +10,7 @@ import datetime
 from .User import User
 from .auth import jwt, get_crypto_context
 from .helpers import validate_payload
-from .mongo import client, get_processes_for_user, retrieve_process, store_new_user
+from .mongo import client, get_processes_for_user, retrieve_process, store_new_user, user_owns_operation, get_simulation_data
 
 mongo_db = client['caelus']
 router = Blueprint('router', __name__, template_folder='./templates')
@@ -21,6 +22,7 @@ REGISTER_POST = '/register'
 NEW_PROCESS_POST = '/new_mission'
 HALT_PROCESS_POST = '/halt/<pid>'
 LOGIN_POST = '/login'
+SIM_OUT_GET = '/simulation_data/<operation_id>'
 
 @router.get('/')
 def index():
@@ -64,6 +66,18 @@ def stop_process(pid):
 def get_jobs():
     user_id = get_jwt_identity()['username']
     return make_response(jsonify(list(get_processes_for_user(mongo_db, user_id))), 200)
+
+@router.get(SIM_OUT_GET)
+@jwt_required()
+def get_sim_data(operation_id):
+    user_id = get_jwt_identity()['username']
+    if not user_owns_operation(mongo_db, user_id, operation_id):
+        return make_response(jsonify({'msg':f'You do not own operation {operation_id}'}), 401)
+    sim_data = get_simulation_data(mongo_db, operation_id)
+    if sim_data is not None:
+        return make_response(jsonify(sim_data), 200)
+    return make_response(jsonify({'msg':'Simulation data unavailable. Try again later.'}), 404)
+
 
 @jwt.unauthorized_loader
 def unauthorised(_):
