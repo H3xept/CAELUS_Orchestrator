@@ -5,7 +5,7 @@ from typing import Dict
 import logging
 import time
 from threading import Thread, Condition
-from queue import Empty, Queue
+from queue import Empty, PriorityQueue
 from random import random
 from math import floor
 
@@ -102,7 +102,7 @@ class ProcessManager():
     def __init__(self, db, max_concurrent_processes = 10, logger=logging.getLogger()):
         self.__max_concurrent_processes = max_concurrent_processes
         self.__ps_running = 0
-        self.__ps_queue = Queue()
+        self.__ps_queue = PriorityQueue()
         self.__active_ps: Dict[str, Process] = {}
         self.__old_ps: Dict[str, Process] = {}
         self.__database = db
