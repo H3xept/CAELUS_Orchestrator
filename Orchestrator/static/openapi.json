@@ -68,56 +68,54 @@ paths:
         required: true
         description: The body of this request should contain the JSON file with the information required by the simulator.
         content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                waypoints:
-                  type: array
-                  items: 
-                    type: array
-                    items:
-                      type: number
-                      format: double
-                  example: [[-5.130347001, 55.573712, 76.34867418469977], [-5.127004941287092, 55.56680838912485, 91.58793050899115], [-5.123662806694234, 55.55990485003062, 134.41024078024992]]
-                operation_id:
-                  type: string
-                  example: d40a18aa-6151-4593-8d30-44cdd3e97d36
-                control_area_id:
-                  type: string
-                  example: 2eee4ddf-b230-4be1-aee0-0a827e818fa5
-                operation_reference_number:
-                  type: string
-                  example: 443ba31f-ee3b-4abd-8eaa-d73cfad9f6c9
-                drone_id:
-                  type: string
-                  example: c1ccc111-0647-4c4d-b93e-91bd740bb87d
-                drone_registration_number:
-                  type: string
-                  example: 5c17c4d2-e878-4a47-a6a3-724f16f46ba2
-                dis_auth_token:
-                  type: string
-                  example: Bearer eyJ0eXAiOiJ...oQHfTjaqiT01JUpk_y0C46Mns
-                thermal_model_timestep:
-                  type: number
-                  format: float
-                  minimum: 0.004
-                aeroacoustic_model_timestep:
-                  type: number
-                  format: float
-                  minimum: 0.004
-                drone_config:
-                  type: object
-                  example: {}
-                g_acceleration:
-                  type: number
-                  format: float
-                  example: 9.81
-                initial_lon_lat_alt:
-                  type: array
-                  items:
-                    type: number
-                  example: [-5.130347001, 55.573712, 46.10]
+            application/json:
+              schema:
+                type: object
+                example: {
+                  "waypoints": [
+                    [
+                      -5.130347001,
+                      55.573712,
+                      76.34867418469977
+                    ],
+                    [
+                      -5.127004941287092,
+                      55.56680838912485,
+                      91.58793050899115
+                    ],
+                    [
+                      -5.123662806694234,
+                      55.55990485003062,
+                      134.41024078024992
+                    ],
+                    [
+                      -4.346594476,
+                      55.856459795,
+                      34.135934166412675
+                    ]
+                  ],
+                  "operation_id": "d40a18aa-6151-4593-8d30-44cdd3e97d36",
+                  "control_area_id": "2eee4ddf-b230-4be1-aee0-0a827e818fa5",
+                  "operation_reference_number": "443ba31f-ee3b-4abd-8eaa-d73cfad9f6c9",
+                  "drone_id": "c1ccc111-0647-4c4d-b93e-91bd740bb87d",
+                  "drone_registration_number": "5c17c4d2-e878-4a47-a6a3-724f16f46ba2",
+                  "dis_auth_token": "Bearer eyJ0eXAiOiJ...oQHfTjaqiT01JUpk_y0C46Mns",
+                  "thermal_model_timestep": 0.004,
+                  "aeroacoustic_model_timestep": 0.004,
+                  "drone_config": {},
+                  "g_acceleration": 9.81,
+                  "effective_start_time": 1638526876,
+                  "initial_lon_lat_alt": [
+                    -5.130347001,
+                    55.573712,
+                    46.1
+                  ],
+                  "final_lon_lat_alt": [
+                    -4.346594476,
+                    55.856459795,
+                    34.135934166412675
+                  ]
+                }
                 
       responses:
         '200':
@@ -223,6 +221,11 @@ paths:
                             -5.123662806694234,
                             55.55990485003062,
                             134.41024078024992
+                          ],
+                          [
+                            -4.346594476,
+                            55.856459795,
+                            34.135934166412675
                           ]
                         ],
                         "operation_id": "d40a18aa-6151-4593-8d30-44cdd3e97d36",
@@ -235,10 +238,16 @@ paths:
                         "aeroacoustic_model_timestep": 0.004,
                         "drone_config": {},
                         "g_acceleration": 9.81,
+                        "effective_start_time": 1638526876,
                         "initial_lon_lat_alt": [
                           -5.130347001,
                           55.573712,
                           46.1
+                        ],
+                        "final_lon_lat_alt": [
+                          -4.346594476,
+                          55.856459795,
+                          34.135934166412675
                         ]
                       }
                     status:

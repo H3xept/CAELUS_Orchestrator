@@ -120,7 +120,7 @@ class ProcessManager():
         update_process_status(self.__database, process)
 
     def __start_new_process(self, docker_image, mission_file_path, _id, issuer_id):
-        p = Process(_id, issuer_id, docker_image, mission_file_path, self)
+        p = Process(_id, issuer_id, docker_image, mission_file_path, self, logger=self.__logger)
         p.daemon = True
         p.name = f'Simulation_{mission_file_path}'
         p.start()
@@ -137,10 +137,11 @@ class ProcessManager():
         return True
 
 
-    def schedule_process(self, docker_image, mission_file_path, issuer_id):
+    def schedule_process(self, docker_image, mission_payload, issuer_id):
         _id = str(uuid.uuid4())
-        self.__logger.info(f'Enqueueing new process (docker_img: {docker_image}, mission: {mission_file_path})')
-        self.__ps_queue.put((docker_image, mission_file_path, _id, issuer_id))
+        effective_start_time = mission_payload['effective_start_time']
+        self.__logger.info(f'Enqueueing new process (docker_img: {docker_image}, mission: {mission_payload}) for {effective_start_time}')
+        self.__ps_queue.put((effective_start_time, docker_image, mission_payload, _id, issuer_id))
         return _id
 
     def reschedule_process(self, old_p):
@@ -150,9 +151,12 @@ class ProcessManager():
         if self.__ps_running >= self.__max_concurrent_processes:
             return
         try:
-            docker_img, mission_fp, _id, issuer_id = self.__ps_queue.get_nowait()
-            self.__logger.info(f'Dequeued new process (docker_img: {docker_img}, mission: {mission_fp})')
-            self.__start_new_process(docker_img, mission_fp, _id, issuer_id)
+            start_time, docker_img, mission_payload, _id, issuer_id = self.__ps_queue.get_nowait()
+            if time.time() < start_time:
+                self.schedule_process(docker_img, mission_payload, issuer_id)
+                return
+            self.__logger.info(f'Dequeued new process (docker_img: {docker_img}, mission: {mission_payload})')
+            self.__start_new_process(docker_img, mission_payload, _id, issuer_id)
         except Empty as _:
             pass
         except Exception as e:

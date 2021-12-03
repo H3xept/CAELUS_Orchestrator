@@ -11,10 +11,11 @@ from .User import User
 from .auth import jwt, get_crypto_context
 from .helpers import validate_payload
 from .mongo import client, get_processes_for_user, retrieve_process, store_new_user, user_owns_operation, get_simulation_data
+import logging
 
 mongo_db = client['caelus']
 router = Blueprint('router', __name__, template_folder='./templates')
-router.ps = ProcessManager(mongo_db, max_concurrent_processes=10)
+router.ps = ProcessManager(mongo_db, max_concurrent_processes=10, logger=logging.getLogger('waitress'))
 
 JOBS_GET = '/jobs'
 REGISTER_POST = '/register'
