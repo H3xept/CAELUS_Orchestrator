@@ -82,7 +82,7 @@ def get_sim_data(job_id):
 
     user_id = get_jwt_identity()['username']
     if not user_owns_operation(mongo_db, user_id, operation_id):
-        return make_response(jsonify({'msg':f'You do not own operation {operation_id}'}), 401)
+        return make_response(jsonify({'msg':f'You do not own operation for job {job_id}'}), 401)
     sim_data = get_simulation_data(mongo_db, operation_id)
     if sim_data is not None:
         return make_response(jsonify(sim_data), 200)
