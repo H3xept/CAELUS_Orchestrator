@@ -165,19 +165,19 @@ paths:
         '402':
           description: Requested docker image hasn't been found.
           
-  /simulation_data/{operation_id}:
+  /simulation_data/{job_id}:
     get:
       tags:
         - Simulation
-      description: Retrieves the simulation data for a given operation
+      description: Retrieves the simulation data for a given job
       parameters:
         - in: path
-          name: operation_id
+          name: job_id
           schema:
             type: string
             example: 5c17c4d2-e878-4a47-a6a3-724f16f46ba2
           required: true
-          description: UUID of the operation to retrieve information about.
+          description: UUID of the job to retrieve information about.
           
       responses:
         '200':

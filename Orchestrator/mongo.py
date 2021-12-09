@@ -54,3 +54,9 @@ def user_owns_operation(database, user_id, operation_id):
 def get_simulation_data(database, operation_id):
     sim_data = database[SIM_OUT]
     return sim_data.find_one({'operation_id':operation_id}, {'_id': False})
+
+def get_operation_id_for_job_id(database, job_id):
+    flight_data = database[FLIGHT_DATA]
+    res = flight_data.find_one({'id':job_id}, {'_id': False, 'mission_payload.operation_id':True})
+    if res is not None:
+        return res['mission_payload']['operation_id']

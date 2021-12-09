@@ -10,7 +10,7 @@ import datetime
 from .User import User
 from .auth import jwt, get_crypto_context
 from .helpers import validate_payload
-from .mongo import client, get_processes_for_user, retrieve_process, store_new_user, user_owns_operation, get_simulation_data
+from .mongo import client, get_processes_for_user, retrieve_process, store_new_user, user_owns_operation, get_simulation_data, get_operation_id_for_job_id
 import logging
 from .docker_helper import get_docker
 
@@ -24,7 +24,7 @@ REGISTER_POST = '/register'
 NEW_PROCESS_POST = '/new_mission'
 HALT_PROCESS_POST = '/halt/<pid>'
 LOGIN_POST = '/login'
-SIM_OUT_GET = '/simulation_data/<operation_id>'
+SIM_OUT_GET = '/simulation_data/<job_id>'
 
 @router.get('/')
 def index():
@@ -77,7 +77,9 @@ def get_jobs():
 
 @router.get(SIM_OUT_GET)
 @jwt_required()
-def get_sim_data(operation_id):
+def get_sim_data(job_id):
+    operation_id = get_operation_id_for_job_id(mongo_db, job_id)
+
     user_id = get_jwt_identity()['username']
     if not user_owns_operation(mongo_db, user_id, operation_id):
         return make_response(jsonify({'msg':f'You do not own operation {operation_id}'}), 401)
