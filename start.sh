@@ -10,4 +10,4 @@ fi
 source ./venv/bin/activate
 
 docker-compose build
-docker-composer up -d
+docker-compose up -d
