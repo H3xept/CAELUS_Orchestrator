@@ -6,6 +6,7 @@ services:
     - "80:5000"
     volumes:
     - .:/opt
+    - /var/run/docker.sock:/var/run/docker.sock
     links:
     - mongo
     depends_on:

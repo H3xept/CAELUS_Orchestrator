@@ -1,5 +1,5 @@
 import enum
-from os import EX_CANTCREAT
+from os import EX_CANTCREAT, stat
 import uuid
 from typing import Dict
 import logging
@@ -8,7 +8,11 @@ from threading import Thread, Condition
 from queue import Empty, PriorityQueue
 from random import random
 from math import floor
+import docker as docker_lib
+import json
 
+from requests.exceptions import ReadTimeout
+from .docker_helper import get_docker
 from .mongo import store_new_process, update_process_status, cleanup_dangling_processes
 
 class Process(Thread):
@@ -17,12 +21,12 @@ class Process(Thread):
     def status_to_string(s):
         return {i:v for i,v in enumerate(['CREATED', 'RUNNING', 'ERROR', 'TERMINATED', 'HALTED'])}[s]
 
-    def __init__(self, id, issuer_id, docker_image, mission_file_path, status_update_delegate, logger=logging.getLogger()):
+    def __init__(self, id, issuer_id, docker_image, mission_payload, status_update_delegate, logger=logging.getLogger()):
         super().__init__()
         self.__id = id
         self.__issuer_id = issuer_id
         self.__status = Process.CREATED
-        self.__mission_file_path = mission_file_path
+        self.__mission_payload = mission_payload
         self.__docker_image = docker_image
         self.__error = None
         self.__created_at = time.time()
@@ -59,18 +63,61 @@ class Process(Thread):
         self.__logger.info(f'Process {self} terminated')
         return Process.TERMINATED
 
+    def __run_docker_instance(self):
+        def monitor(container):
+            while True:
+                if self.__should_stop:
+                    self.__logger.info(f'Container {self.__mission_payload["operation_id"]} has been issued a forceful stop.')
+                    try:
+                        container.stop(timeout=5)
+                        return Process.HALTED
+                    except docker_lib.errors.APIError as e:
+                        self.__logger.error(e)
+                        self.__error = e
+                        return Process.ERROR
+                try:
+                    status_code = container.wait(timeout=1)
+                    self.__logger.info(f'Container exited with status code {status_code}')
+                    if 'Error' in status_code and status_code['Error'] is not None:
+                        self.__error = status_code['Error']
+                        return Process.ERROR
+                    return Process.TERMINATED
+                except Exception:
+                    pass
+                time.sleep(2)
+        container = None
+        try:
+            self.__logger.info(f'Spawning container for image {self.get_docker_image()}.')
+            container = get_docker().client.containers.create(
+                self.get_docker_image(),
+                detach=True, auto_remove=True, network_mode='caelus_orchestrator_default',
+                stdin_open = True, tty = True,
+                environment={'PAYLOAD':json.dumps(self.__mission_payload)})
+            container.start()
+            self.__logger.info(f'Container {container} spawned successfully.')
+            return monitor(container)
+        except Exception as e:
+            self.__logger.error(e)
+            self.__error = e
+            return Process.ERROR
+        finally:
+            if container is not None:
+                self.__logger.info(f'Terminating container {container}')
+                container.stop(timeout=2)
+
     def run(self):
         try:
             self.__logger.info(f'Starting process {self} with image {self.__docker_image}')
             self.set_status(Process.RUNNING)
-            self.set_status(self.__simulate_docker())
+            self.set_status(self.__run_docker_instance())
         except Exception as e:
             self.__logger.info(f'{self} errored out during startup')
+            self.__logger.error(f'{e}')
             self.set_status(Process.ERROR)
             self.__error = e
 
     def __repr__(self) -> str:
-        return f'<Process:{self.__mission_file_path}_{self.__created_at}>'
+        return f'<Process:{self.__mission_payload["operation_id"]}_{self.__created_at}>'
 
     def get_id(self):
         return self.__id
@@ -85,7 +132,7 @@ class Process(Thread):
         return self.__docker_image
 
     def get_mission_data(self):
-        return self.__mission_file_path
+        return self.__mission_payload
 
     def to_dict(self):
         return {
@@ -119,10 +166,10 @@ class ProcessManager():
     def process_status_changed(self, process):
         update_process_status(self.__database, process)
 
-    def __start_new_process(self, docker_image, mission_file_path, _id, issuer_id):
-        p = Process(_id, issuer_id, docker_image, mission_file_path, self, logger=self.__logger)
+    def __start_new_process(self, docker_image, mission_payload, _id, issuer_id):
+        p = Process(_id, issuer_id, docker_image, mission_payload, self, logger=self.__logger)
         p.daemon = True
-        p.name = f'Simulation_{mission_file_path}'
+        p.name = f'Simulation_{mission_payload["operation_id"]}'
         p.start()
         self.__active_ps[_id] = p
         self.__new_process(p)
@@ -136,16 +183,24 @@ class ProcessManager():
         p.halt()
         return True
 
+    def __image_available(self, img):
+        try:
+            _  = get_docker().client.images.get(img)
+            return True
+        except Exception as e:
+            return False
 
     def schedule_process(self, docker_image, mission_payload, issuer_id):
+        if not self.__image_available(docker_image):
+            return None
         _id = str(uuid.uuid4())
         effective_start_time = mission_payload['effective_start_time']
-        self.__logger.info(f'Enqueueing new process (docker_img: {docker_image}, mission: {mission_payload}) for {effective_start_time}')
+        self.__logger.info(f'Enqueueing new process (docker_img: {docker_image}, mission: {mission_payload["operation_id"]}) for {effective_start_time}')
         self.__ps_queue.put((effective_start_time, docker_image, mission_payload, _id, issuer_id))
         return _id
 
     def reschedule_process(self, old_p):
-        self.schedule_process(old_p.get_docker_image(), old_p.get_mission_data(), old_p.get_issuer_id())
+        self.schedule_process(old_p.get_docker_image(), old_p.get_mission_data(), old_p.get_issuer())
     
     def __dequeue_ps(self):
         if self.__ps_running >= self.__max_concurrent_processes:
@@ -155,7 +210,7 @@ class ProcessManager():
             if time.time() < start_time:
                 self.schedule_process(docker_img, mission_payload, issuer_id)
                 return
-            self.__logger.info(f'Dequeued new process (docker_img: {docker_img}, mission: {mission_payload})')
+            self.__logger.info(f'Dequeued new process (docker_img: {docker_img}, mission: {mission_payload["operation_id"]})')
             self.__start_new_process(docker_img, mission_payload, _id, issuer_id)
         except Empty as _:
             pass

@@ -12,6 +12,7 @@ from .auth import jwt, get_crypto_context
 from .helpers import validate_payload
 from .mongo import client, get_processes_for_user, retrieve_process, store_new_user, user_owns_operation, get_simulation_data
 import logging
+from .docker_helper import get_docker
 
 mongo_db = client['caelus']
 router = Blueprint('router', __name__, template_folder='./templates')
@@ -40,9 +41,15 @@ def new_process():
         mission_data = payload['mission']
         issuer_username = get_jwt_identity()['username']
         job_id = ps.schedule_process(docker_img,mission_data,issuer_username)
-        return make_response(jsonify({
-            'job_id':job_id
-        }), 200)
+        if job_id is not None:
+            return make_response(jsonify({
+                'job_id':job_id
+            }), 200)
+        else:
+            return make_response(jsonify({
+                'msg':f'Requested image ({docker_img}) not present.',
+                'imgs_available': [img.tags for img in get_docker().client.images.list() if img.tags != [] and any(['caelus' in name for name in img.tags])]
+            }), 402)
     else:
         return make_response(jsonify({}), 400)
 

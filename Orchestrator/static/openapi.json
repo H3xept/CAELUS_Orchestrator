@@ -162,6 +162,9 @@ paths:
                     example: eyJ0eXAiOiJ...oQHfTjaqiT01JUpk_y0C46Mns
         '401':
           description: Not logged in
+        '402':
+          description: Requested docker image hasn't been found.
+          
   /simulation_data/{operation_id}:
     get:
       tags:

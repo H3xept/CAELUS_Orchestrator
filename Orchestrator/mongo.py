@@ -1,6 +1,11 @@
 import pymongo
+from os import environ
 
-client = pymongo.MongoClient("mongodb://mongo/")
+mongo_uri = 'mongodb://mongo/' if 'IN_DOCKER' in environ else 'mongodb://localhost/'
+print(f'Trying to connect to {mongo_uri}...')
+client = pymongo.MongoClient(mongo_uri)
+client.admin.command('ping')
+print(f'Connected!')
 
 FLIGHT_DATA = 'FLIGHT_DATA'
 USERS = 'USERS'
