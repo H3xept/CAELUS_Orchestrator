@@ -15,6 +15,9 @@ from requests.exceptions import ReadTimeout
 from .docker_helper import get_docker
 from .mongo import store_new_process, update_process_status, cleanup_dangling_processes
 
+SIGTERM = 143
+SIGKILL = 137
+
 class Process(Thread):
     CREATED, RUNNING, ERROR, TERMINATED, HALTED = 0,1,2,3,4
     @staticmethod
@@ -63,6 +66,13 @@ class Process(Thread):
         self.__logger.info(f'Process {self} terminated')
         return Process.TERMINATED
 
+    def __code_to_result(self, exit_code):
+        if exit_code == 0:
+            return Process.TERMINATED
+        elif exit_code == SIGTERM or exit_code == SIGKILL: # assume killed by user via /halt/<pid>
+            return Process.HALTED
+        return Process.ERROR
+
     def __run_docker_instance(self):
         def monitor(container):
             while True:
@@ -80,8 +90,7 @@ class Process(Thread):
                     self.__logger.info(f'Container exited with status code {status_code}')
                     if 'Error' in status_code and status_code['Error'] is not None:
                         self.__error = status_code['Error']
-                        return Process.ERROR
-                    return Process.TERMINATED
+                    return self.__code_to_result(status_code)
                 except Exception:
                     pass
                 time.sleep(2)
@@ -103,7 +112,10 @@ class Process(Thread):
         finally:
             if container is not None:
                 self.__logger.info(f'Terminating container {container}')
-                container.stop(timeout=2)
+                try:
+                    container.stop(timeout=2)
+                except:
+                    pass
 
     def run(self):
         try:
