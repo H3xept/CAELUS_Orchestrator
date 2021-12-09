@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-VENV_LOCATION=$1;
+VENV_LOCATION='./venv';
 
 if ! [[ -d $VENV_LOCATION ]]; then
     echo "Virtual environment not present. Creating virtual environment named 'venv' at $VENV_LOCATION.";
@@ -10,4 +10,4 @@ fi
 source ./venv/bin/activate
 
 docker-compose build
-docker-composer up
+docker-composer up -d
