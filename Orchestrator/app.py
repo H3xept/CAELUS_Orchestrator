@@ -1,5 +1,6 @@
 from flask import Flask, render_template
 from .auth import setup_auth
+from flask_compress import Compress
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -9,6 +10,8 @@ app.config['JWT_TOKEN_LOCATION'] = ["headers", "cookies"]
 from .User import User
 setup_auth(app)
 from .router import router
+
+Compress(app)
 
 @app.route('/docs')
 def get_docs():

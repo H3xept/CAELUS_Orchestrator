@@ -17,6 +17,7 @@ from .mongo import store_new_process, update_process_status, cleanup_dangling_pr
 
 SIGTERM = 143
 SIGKILL = 137
+MISSION_UPLOAD_FAIL = -3 
 
 class Process(Thread):
     CREATED, RUNNING, ERROR, TERMINATED, HALTED = 0,1,2,3,4
@@ -71,6 +72,9 @@ class Process(Thread):
             return Process.TERMINATED
         elif exit_code == SIGTERM or exit_code == SIGKILL: # assume killed by user via /halt/<pid>
             return Process.HALTED
+        elif exit_code == MISSION_UPLOAD_FAIL:
+            self.__error = Exception('Mission upload fail.')
+            return Process.ERROR
         return Process.ERROR
 
     def __run_docker_instance(self):
