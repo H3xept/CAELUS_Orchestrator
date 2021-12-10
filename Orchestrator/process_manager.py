@@ -273,6 +273,9 @@ class ProcessManager():
         items = self.__old_ps.items()
         return { pid:Process.status_to_string(p.get_status()) for pid, p in self.__old_ps.items() } if items != {} else None
 
+    def get_process_queue_for_user(self, user_id):
+        return [e for e in list(self.__ps_queue.queue) if e[-1] == user_id]
+
     def processes_info(self):
         ps = {
             'active':self.__get_active_processes(),

@@ -19,6 +19,7 @@ router = Blueprint('router', __name__, template_folder='./templates')
 router.ps = ProcessManager(mongo_db, max_concurrent_processes=10, logger=logging.getLogger('waitress'))
 
 JOBS_GET = '/jobs'
+PENDING_JOBS_GET = '/pending_jobs'
 REGISTER_POST = '/register'
 
 NEW_PROCESS_POST = '/new_mission'
@@ -74,6 +75,12 @@ def stop_process(pid):
 def get_jobs():
     user_id = get_jwt_identity()['username']
     return make_response(jsonify(list(get_processes_for_user(mongo_db, user_id))), 200)
+
+@router.get(PENDING_JOBS_GET)
+@jwt_required()
+def get_pending_jobs():
+    user_id = get_jwt_identity()['username']
+    return make_response(jsonify(router.ps.get_process_queue_for_user(user_id)), 200)
 
 @router.get(SIM_OUT_GET)
 @jwt_required()
