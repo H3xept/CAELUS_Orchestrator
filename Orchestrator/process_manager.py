@@ -86,10 +86,12 @@ class Process(Thread):
                         self.__error = e
                         return Process.ERROR
                 try:
-                    status_code = container.wait(timeout=1)
-                    self.__logger.info(f'Container exited with status code {status_code}')
-                    if 'Error' in status_code and status_code['Error'] is not None:
-                        self.__error = status_code['Error']
+                    status = container.wait(timeout=1)
+                    error = status['Error'] if 'Error' in status else None
+                    status_code = status['StatusCode'] if 'StatusCode' in status else None
+                    self.__logger.info(f'Container exited with status {status_code}')
+                    if error is not None:
+                        self.__error = error
                     return self.__code_to_result(status_code)
                 except Exception:
                     pass
