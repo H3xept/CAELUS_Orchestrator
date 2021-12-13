@@ -94,9 +94,7 @@ class Process(Thread):
                     error = status['Error'] if 'Error' in status else None
                     status_code = status['StatusCode'] if 'StatusCode' in status else None
                     self.__logger.info(f'Container exited with status {status_code}')
-                    if error is not None:
-                        self.__error = error
-                    self.set_status(self.__code_to_result(status_code))
+                    return (status_code, error)
                 except Exception:
                     pass
                 time.sleep(2)
@@ -112,7 +110,9 @@ class Process(Thread):
                 environment={'PAYLOAD':json.dumps(self.__mission_payload)})
             container.start()
             self.__logger.info(f'Container {container} spawned successfully.')
-            return monitor(container)
+            status_code, error = monitor(container)
+            self.__error = error
+            return status_code
         except Exception as e:
             self.__logger.error(e)
             self.__error = e
@@ -129,7 +129,8 @@ class Process(Thread):
         try:
             self.__logger.info(f'Starting process {self} with image {self.__docker_image}')
             self.set_status(Process.RUNNING)
-            self.__run_docker_instance()
+            status_code = self.__run_docker_instance()
+            self.__logger.info(f'Returned status code: {status_code}')
         except Exception as e:
             self.__logger.info(f'{self} errored out during startup')
             self.__logger.error(f'{e}')
