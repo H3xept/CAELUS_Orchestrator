@@ -32,6 +32,7 @@ class Docker():
             self.__logger.info('Checking local DT image...')
             self.client.images.get(f'{self.__creds["serveraddress"]}{Docker.DT_IMAGE}')
         except:
+            return
             self.__logger.info('Image not present!')
             self.__logger.info(f'Pulling latest of {Docker.DT_IMAGE} from {self.__creds["serveraddress"]}')
             self.client.images.pull(f'{self.__creds["serveraddress"]}{Docker.DT_IMAGE}', auth_config=self.__creds)

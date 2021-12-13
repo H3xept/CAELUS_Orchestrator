@@ -56,7 +56,7 @@ class Process(Thread):
         
     def __simulate_docker(self):
         def wait():
-            time.sleep(floor(10 * random()) + 10)
+            time.sleep(floor(10 * random()))
         t = Thread(target=wait)
         t.start()
         while t.is_alive():
@@ -65,7 +65,7 @@ class Process(Thread):
                 self.__logger.info(f'Process {self} forcibly exited.')
                 return Process.HALTED
         self.__logger.info(f'Process {self} terminated')
-        return Process.TERMINATED
+        return self.__code_to_result(0)
 
     def __code_to_result(self, exit_code):
         if exit_code == 0:
@@ -96,7 +96,7 @@ class Process(Thread):
                     self.__logger.info(f'Container exited with status {status_code}')
                     if error is not None:
                         self.__error = error
-                    return self.__code_to_result(status_code)
+                    self.set_status(self.__code_to_result(status_code))
                 except Exception:
                     pass
                 time.sleep(2)
@@ -127,7 +127,7 @@ class Process(Thread):
         try:
             self.__logger.info(f'Starting process {self} with image {self.__docker_image}')
             self.set_status(Process.RUNNING)
-            self.set_status(self.__run_docker_instance())
+            self.__run_docker_instance()
         except Exception as e:
             self.__logger.info(f'{self} errored out during startup')
             self.__logger.error(f'{e}')
