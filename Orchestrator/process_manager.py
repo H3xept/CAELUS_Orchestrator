@@ -106,7 +106,7 @@ class Process(Thread):
             container = get_docker().client.containers.create(
                 self.get_docker_image(),
                 detach=True,
-                # auto_remove=True,
+                auto_remove=True,
                 network_mode='caelus_orchestrator_default',
                 stdin_open = True, tty = True,
                 environment={'PAYLOAD':json.dumps(self.__mission_payload)})
