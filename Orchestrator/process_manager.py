@@ -219,7 +219,7 @@ class ProcessManager():
         _id = str(uuid.uuid4())
         effective_start_time = mission_payload['effective_start_time']
         self.__logger.info(f'Enqueueing new process (docker_img: {docker_image}, mission: {mission_payload["operation_id"]}) for {effective_start_time}')
-        self.__ps_queue.put((effective_start_time, docker_image, mission_payload, _id, issuer_id))
+        self.__ps_queue.put((effective_start_time, _id, docker_image, mission_payload, issuer_id))
         return _id
 
     def reschedule_process(self, old_p):
@@ -229,7 +229,7 @@ class ProcessManager():
         if self.__ps_running >= self.__max_concurrent_processes:
             return
         try:
-            start_time, docker_img, mission_payload, _id, issuer_id = self.__ps_queue.get_nowait()
+            start_time, _id, docker_img, mission_payload, issuer_id = self.__ps_queue.get_nowait()
             if time.time() < start_time:
                 self.schedule_process(docker_img, mission_payload, issuer_id)
                 return
