@@ -111,6 +111,7 @@ class Process(Thread):
                 environment={'PAYLOAD':json.dumps(self.__mission_payload)})
             container.start()
             self.__logger.info(f'Container {container} spawned successfully.')
+            self.set_status(Process.RUNNING)
             status_code = monitor(container)
             return status_code
         except Exception as e:
