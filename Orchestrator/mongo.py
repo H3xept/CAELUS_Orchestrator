@@ -27,7 +27,7 @@ def get_processes_for_user(database, user_id):
 def cleanup_dangling_processes(database):
     # Set all running to halted
     flight_data = database[FLIGHT_DATA]
-    ns = flight_data.update_many({'status':1}, {'$set':{'status':4}})
+    ns = flight_data.update_many({'status':1}, {'$set':{'status':4, 'status_str':"HALTED"}})
     if ns.modified_count > 0:
         print(f'Cleaned up {ns.modified_count} dangling processes')
 
