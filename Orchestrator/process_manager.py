@@ -90,22 +90,22 @@ class Process(Thread):
                         self.__error = e
                         return Process.ERROR
                 try:
-                    status = container.wait(timeout=1)
+                    status = container.wait(timeout=3)
                     error = status['Error'] if 'Error' in status else None
                     status_code = status['StatusCode'] if 'StatusCode' in status else None
                     self.__logger.info(f'Container exited with status {status_code}')
                     self.__error = error
+                    container.remove()
                     return self.__code_to_result(status_code)
                 except Exception:
                     pass
-                time.sleep(2)
         container = None
         try:
             self.__logger.info(f'Spawning container for image {self.get_docker_image()}.')
             container = get_docker().client.containers.create(
                 self.get_docker_image(),
                 detach=True,
-                auto_remove=True,
+                auto_remove=False,
                 network_mode='caelus_orchestrator_default',
                 stdin_open = True, tty = True,
                 environment={'PAYLOAD':json.dumps(self.__mission_payload)})
