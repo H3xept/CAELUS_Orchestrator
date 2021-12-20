@@ -166,10 +166,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  docker_image:
+                  docker_img:
                     type: string
                     example: "ghcr.io/h3xept/caelus_dt:latest"
-                  mission_payload:
+                  mission:
                     $ref: '#/components/schemas/MissionPayload'
                 
       responses:
