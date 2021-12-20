@@ -164,7 +164,13 @@ paths:
         content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MissionPayload'
+                type: object
+                properties:
+                  docker_image:
+                    type: string
+                    example: "ghcr.io/h3xept/caelus_dt:latest"
+                  mission_payload:
+                    $ref: '#/components/schemas/MissionPayload'
                 
       responses:
         '200':
@@ -254,7 +260,7 @@ paths:
                       example: eyJ0eXAiOiJ...oQHfTjaqiT01JUpk_y0C46Mns
                     docker_image:
                       type: string
-                      example: 'caelus_dt_0.0.1'
+                      example: 'ghcr.io/h3xept/caelus_dt:latest'
                     mission_payload:
                       $ref: "#/components/schemas/MissionPayload"
                     status:
