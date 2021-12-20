@@ -24,7 +24,17 @@ components:
         arm_length:
           type: number
           format: float
-          example: 0.30
+          example: 0.16
+        tail_length:
+          type: number
+          format: float
+          example: 0.32
+          description: "Distance of pusher propeller from c.o.g."
+        type:
+          type: number
+          format: integer
+          example: 0
+          description: "0: Quadrotor, 1: Fixed-wing"
     LatLonArray:
       type: array
       items:
@@ -39,6 +49,9 @@ components:
     UUID4:
       type: string
       example: "d40a18aa-6151-4593-8d30-44cdd3e97d36"
+    BearerToken:
+      type: string
+      example: "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJaR2w3MjFlODhJenB3ZUJpZ1lESkl6UEY2OExHVDJrajYtNzFweGE2ZUEwIn0.eyJleHAiOjE2Mzk0MjMzMTMsImlhdCI6MTYzOTQxOTcxMywianRpIjoiNjYwZWEzM2MtMWZjZS00MmEwLTgzNTQtOTdiY2E2ZTU3YWNhIiwiaXNzIjoiaHR0cHM6Ly9vYXV0aC5mbHlhbnJhLm5ldC9hdXRoL3JlYWxtcy9BTlJBIiwiYXVkIjpbIkFucmFUZWNobm9sb2dpZXMiLCJTUy1DVFIiLCJhY2NvdW50Il0sInN1YiI6Ijc0MjYyYWFiLTg2YzgtNGRkOS1iYmRiLTA2MTcxMGY0ZGJjNCIsInR5cCI6IkJlYXJlciIsImF6cCI6IkRNUyIsInNlc3Npb25fc3RhdGUiOiI3YzkxMTA3MS1hMzNjLTQ1MDMtOTVhNi1lZjgyZDk0MWJmMGUiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbIioiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIkxheWVyTWFuYWdlcl9SZWFkT25seSJdfSwicmVzb3VyY2VfYWNjZXNzIjp7IlNTLUNUUiI6eyJyb2xlcyI6WyJQSUxPVCIsIkFETUlOIl19LCJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6ImVtYWlsIHByb2ZpbGUiLCJ3ZWJzaXRlIjoiIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsIm5hbWUiOiJESVMgQWRtaW4iLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhZG1pbkBkaXMudGVzdCIsImdpdmVuX25hbWUiOiJESVMiLCJmYW1pbHlfbmFtZSI6IkFkbWluIiwiZW1haWwiOiJhZG1pbkBkaXMudGVzdCJ9.e083Q_Y0gPS0_E4mU08csBEWCMsnBF0QebW19nflyJfijxKWiyf076RbmtFn3yuiipBseeBjK_ipd0jVSBfH2lpY_GQ8udOfaDBq9Vaq-dFT0MH7VC4yHM5oMBY9mblNw4lpPyDNT8dWu44qM5JytkqxEbsPbiKVUjJ0Z-LSSm_Sq8Lp1Otx5GctwzdY_COfEbOYZGA92ic3jAnkOrbKhTH8mMNk8sex6HroNkSRfml_Zy8pqzAn_HzExTPWjQ62OlfivoDilPgZvmSjZhThQ90VFIJGu76xM4DkBUlh9cwiJZQaMFVApMHl-A9SpF3U_Z5-SlVoc3R24vhJ2Xj1JQ"
     MissionPayload:
       type: object
       properties:
@@ -47,6 +60,8 @@ components:
           items:
             $ref: "#/components/schemas/LatLonArray"
         operation_id:
+          $ref: "#/components/schemas/UUID4"
+        delivery_id:
           $ref: "#/components/schemas/UUID4"
         control_area_id:
           $ref: "#/components/schemas/UUID4"
@@ -57,7 +72,9 @@ components:
         drone_registration_number:
           $ref: "#/components/schemas/UUID4"
         dis_auth_token:
-          $ref: "#/components/schemas/UUID4"
+          $ref: "#/components/schemas/BearerToken"
+        cvms_auth_token:
+          $ref: "#/components/schemas/BearerToken"
         thermal_model_timestep:
           type: number
           format: float
