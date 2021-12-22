@@ -128,8 +128,9 @@ def login_post():
         user = User.authenticate(mongo_db, data['username'], data['password'])
         if user is not None:
             print(f'Login successful for user {data["username"]}')
-            token = create_access_token(user)
-            token_expiry = datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+            delta = datetime.timedelta(hours=24)
+            token = create_access_token(user, expires_delta=delta)
+            token_expiry = datetime.datetime.utcnow() + delta
             local_res = make_response(jsonify({
                 'access_token':token,
                 'expires':token_expiry
