@@ -5,7 +5,7 @@ from typing import Dict
 import logging
 import time
 from threading import Thread, Condition
-from queue import Empty, PriorityQueue
+from queue import Empty, PriorityQueue 
 from random import random
 from math import floor
 import docker as docker_lib
@@ -17,7 +17,9 @@ from .mongo import store_new_process, update_process_status, cleanup_dangling_pr
 
 SIGTERM = 143
 SIGKILL = 137
-MISSION_UPLOAD_FAIL = -3 
+MISSION_UPLOAD_FAIL = -3
+STREAM_READ_FAILURE = -4
+VEHICLE_TIMED_OUT = -5
 
 class Process(Thread):
     CREATED, RUNNING, ERROR, TERMINATED, HALTED = 0,1,2,3,4
@@ -74,6 +76,12 @@ class Process(Thread):
             return Process.HALTED
         elif exit_code == MISSION_UPLOAD_FAIL:
             self.__error = Exception('Mission upload fail.')
+            return Process.ERROR
+        elif exit_code == STREAM_READ_FAILURE:
+            self.__error = Exception('Failed in starting up stack.')
+            return Process.ERROR
+        elif exit_code == VEHICLE_TIMED_OUT:
+            self.__error = Exception('Vehicle Mavlink connection timed out!')
             return Process.ERROR
         return Process.ERROR
 
@@ -229,10 +237,11 @@ class ProcessManager():
         if self.__ps_running >= self.__max_concurrent_processes:
             return
         try:
-            start_time, _id, docker_img, mission_payload, issuer_id = self.__ps_queue.get_nowait()
-            if time.time() < start_time:
-                self.schedule_process(docker_img, mission_payload, issuer_id)
-                return
+            if not self.__ps_queue.empty():
+                start_time, _, _, _, _ = self.__ps_queue.queue[0]
+                if time.time() < start_time:
+                    return
+            start_time, _id, docker_img, mission_payload, issuer_id = self.__ps_queue.get_nowait()                
             self.__logger.info(f'Dequeued new process (docker_img: {docker_img}, mission: {mission_payload["operation_id"]})')
             self.__start_new_process(docker_img, mission_payload, _id, issuer_id)
         except Empty as _:
