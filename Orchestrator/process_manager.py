@@ -131,8 +131,8 @@ class Process(Thread):
                 self.__logger.info(f'Terminating container {container}')
                 try:
                     container.stop(timeout=2)
-                except:
-                    pass
+                except Exception as e:
+                    self.__logger.error(f'Exception while trying to stop container {e}')
 
     def run(self):
         try:
