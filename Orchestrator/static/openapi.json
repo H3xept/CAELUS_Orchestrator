@@ -73,6 +73,8 @@ components:
           $ref: "#/components/schemas/UUID4"
         dis_auth_token:
           $ref: "#/components/schemas/BearerToken"
+        dis_refresh_token:
+          $ref: "#/components/schemas/BearerToken"
         cvms_auth_token:
           $ref: "#/components/schemas/BearerToken"
         thermal_model_timestep:
