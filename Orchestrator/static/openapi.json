@@ -17,6 +17,10 @@ components:
           type: number
           format: float
           example: 4
+        max_back_propeller_thrust:
+          type: number
+          format: float
+          example: 6
         max_torque:
           type: number
           format: float
