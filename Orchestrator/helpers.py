@@ -4,7 +4,7 @@ def validate_docker_image(data):
     return True
 
 def validate_mission(data):
-    return all(map(lambda x: x in data, ['waypoints', 'operation_id', 'delivery_id', 'control_area_id', 'operation_reference_number', 'drone_id', 'drone_registration_number', 'cvms_auth_token', 'dis_auth_token', 'dis_refresh_token', 'thermal_model_timestep', 'aeroacoustic_model_timestep', 'drone_config', 'g_acceleration', 'initial_lon_lat_alt', 'final_lon_lat_alt', 'effective_start_time']))
+    return all(map(lambda x: x in data, ['waypoints', 'operation_id', 'group_id', 'delivery_id', 'control_area_id', 'operation_reference_number', 'drone_id', 'drone_registration_number', 'cvms_auth_token', 'dis_auth_token', 'dis_refresh_token', 'thermal_model_timestep', 'aeroacoustic_model_timestep', 'drone_config', 'g_acceleration', 'initial_lon_lat_alt', 'final_lon_lat_alt', 'effective_start_time']))
 
 def validate_payload(payload):
     if payload is None:

@@ -30,6 +30,7 @@ class Process(Thread):
     def __init__(self, id, issuer_id, docker_image, mission_payload, status_update_delegate, logger=logging.getLogger()):
         super().__init__()
         self.__id = id
+        self.__group_id = mission_payload['group_id']
         self.__issuer_id = issuer_id
         self.__status = Process.CREATED
         self.__mission_payload = mission_payload
@@ -165,9 +166,13 @@ class Process(Thread):
     def get_mission_data(self):
         return self.__mission_payload
 
+    def get_group_id(self):
+        return self.__group_id
+
     def to_dict(self):
         return {
             'id': self.get_id(),
+            'group_id': self.get_group_id(),
             'docker_image': self.get_docker_image(),
             'mission_payload': self.get_mission_data(),
             'status': self.get_status(),

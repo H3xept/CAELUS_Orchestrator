@@ -63,6 +63,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/LatLonArray"
+        group_id:
+          $ref: "#/components/schemas/UUID4"
         operation_id:
           $ref: "#/components/schemas/UUID4"
         delivery_id:
