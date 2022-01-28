@@ -105,6 +105,9 @@ components:
           $ref: "#/components/schemas/LatLonArray"
         final_lon_lat_alt:
           $ref: "#/components/schemas/LatLonArray"
+        weather_data_filepath:
+          type: string
+          example: "weather_data.json"
     
 paths:
   /login:
