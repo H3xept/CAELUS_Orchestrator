@@ -6,6 +6,27 @@ info:
 
 components:
   schemas:
+    Wind:
+      type: array
+      items:
+        type: number
+        format: float
+        example: [3.5, -5]
+        description: "Vector representing wind direction and magnitude in m/s. Updrafts are not advised."
+    WeatherData:
+      type: object
+      properties:
+        wind:
+          type: array
+          items:
+            $ref: "#/components/schemas/Wind"
+        temperature:
+          type: array
+          items:
+            type: number
+            format: float
+            description: "Temperature in degrees celsius."
+      description: "An object describing weather conditions for each waypoint."
     DroneConfig:
       type: object
       properties:
