@@ -17,9 +17,12 @@ from .mongo import store_new_process, update_process_status, cleanup_dangling_pr
 
 SIGTERM = 143
 SIGKILL = 137
-MISSION_UPLOAD_FAIL = -3
-STREAM_READ_FAILURE = -4
-VEHICLE_TIMED_OUT = -5
+
+JSON_READ_EC = 2
+MISSION_UPLOAD_FAIL = 3
+STREAM_READ_FAILURE = 4
+VEHICLE_TIMED_OUT = 5
+PREMATURE_LANDING = 6
 
 class Process(Thread):
     CREATED, RUNNING, ERROR, TERMINATED, HALTED = 0,1,2,3,4
