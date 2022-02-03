@@ -18,6 +18,7 @@ from .mongo import store_new_process, update_process_status, cleanup_dangling_pr
 SIGTERM = 143
 SIGKILL = 137
 
+OK = 0
 JSON_READ_EC = 2
 MISSION_UPLOAD_FAIL = 3
 STREAM_READ_FAILURE = 4
@@ -74,7 +75,7 @@ class Process(Thread):
         return self.__code_to_result(0)
 
     def __code_to_result(self, exit_code):
-        if exit_code == 0:
+        if exit_code == OK:
             return Process.TERMINATED
         elif exit_code == SIGTERM or exit_code == SIGKILL: # assume killed by user via /halt/<pid>
             return Process.HALTED
@@ -82,11 +83,13 @@ class Process(Thread):
             self.__error = Exception('Mission upload fail.')
             return Process.ERROR
         elif exit_code == STREAM_READ_FAILURE:
-            self.__error = Exception('Failed in starting up stack.')
+            self.__error = Exception('Failed in starting up simulation stack.')
             return Process.ERROR
         elif exit_code == VEHICLE_TIMED_OUT:
             self.__error = Exception('Vehicle Mavlink connection timed out!')
             return Process.ERROR
+        elif exit_code == PREMATURE_LANDING:
+            self.__error = Exception('Vehicle has landed before reaching landing spot. Check vehicle configuration!')
         return Process.ERROR
 
     def __run_docker_instance(self):
