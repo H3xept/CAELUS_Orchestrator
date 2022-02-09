@@ -14,16 +14,7 @@ import json
 from requests.exceptions import ReadTimeout
 from .docker_helper import get_docker
 from .mongo import store_new_process, update_process_status, cleanup_dangling_processes
-
-SIGTERM = 143
-SIGKILL = 137
-
-OK = 0
-JSON_READ_EC = 2
-MISSION_UPLOAD_FAIL = 3
-STREAM_READ_FAILURE = 4
-VEHICLE_TIMED_OUT = 5
-PREMATURE_LANDING = 6
+from .error_codes import *
 
 class Process(Thread):
     CREATED, RUNNING, ERROR, TERMINATED, HALTED = 0,1,2,3,4
@@ -90,6 +81,8 @@ class Process(Thread):
             return Process.ERROR
         elif exit_code == PREMATURE_LANDING:
             self.__error = Exception('Vehicle has landed before reaching landing spot. Check vehicle configuration!')
+        elif exit_code == UNKNOWN_VEHICLE:
+            self.__error = Exception('Unknown vehicle model, check available vehicles.')
         return Process.ERROR
 
     def __run_docker_instance(self):

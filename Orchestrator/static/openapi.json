@@ -27,6 +27,9 @@ components:
             format: float
             description: "Temperature in degrees celsius."
       description: "An object describing weather conditions for each waypoint."
+    DroneConfigFile:
+      type: string
+      example: "evtol_fw_small.json"
     DroneConfig:
       type: object
       properties:
@@ -112,8 +115,8 @@ components:
           type: number
           format: float
           example: 0.004
-        drone_config:
-          $ref: "#/components/schemas/DroneConfig"
+        drone_config_file:
+          $ref: "#/components/schemas/DroneConfigFile"
         g_acceleration:
           type: number
           format: float
