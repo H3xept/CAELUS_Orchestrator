@@ -30,6 +30,22 @@ components:
     DroneConfigFile:
       type: string
       example: "evtol_fw_small.json"
+    PropellerSpecs:
+      type: object
+      properties:
+        diameter_cm:
+          type: number
+          format: float
+          example: 18.0
+        pitch_cm:
+          type: number
+          format: float
+          example: 10.0
+        blades_n:
+          type: number
+          format: integer
+          example: 2
+
     DroneConfig:
       type: object
       properties:
@@ -37,18 +53,36 @@ components:
           type: number
           format: float
           example: 1.2
-        max_thrust:
+        max_rpm:
           type: number
           format: float
-          example: 4
-        max_back_propeller_thrust:
-          type: number
-          format: float
-          example: 6
+          example: 13000
+        propeller_specs:
+          $ref: "#/components/schemas/PropellerSpecs"
         max_torque:
           type: number
           format: float
           example: 0.05
+        drag_move:
+          type: number
+          format: float
+          example: 0.01
+          description: "Drag coefficient"
+        Ixx:
+          type: number
+          format: float
+          example: 0.0093
+          description: "Moment of inertia about the x-axis"
+        Iyy:
+          type: number
+          format: float
+          example: 0.0093
+          description: "Moment of inertia about the y-axis"
+        Izz:
+          type: number
+          format: float
+          example: 0.0093
+          description: "Moment of inertia about the z-axis"
         arm_length:
           type: number
           format: float
@@ -58,11 +92,6 @@ components:
           format: float
           example: 0.32
           description: "Distance of pusher propeller from c.o.g."
-        type:
-          type: number
-          format: integer
-          example: 0
-          description: "0: Quadrotor, 1: Fixed-wing"
     LatLonArray:
       type: array
       items:
