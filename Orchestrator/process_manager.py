@@ -1,17 +1,15 @@
-import enum
-from os import EX_CANTCREAT, stat
 import uuid
-from typing import Dict
-import logging
+import json
+import sys
 import time
-from threading import Thread, Condition
+import logging
+from math import floor
+from typing import Dict
+from threading import Thread
 from queue import Empty, PriorityQueue 
 from random import random
-from math import floor
-import docker as docker_lib
-import json
 
-from requests.exceptions import ReadTimeout
+import docker as docker_lib
 from .docker_helper import get_docker
 from .mongo import store_new_process, update_process_status, cleanup_dangling_processes
 from .error_codes import *
@@ -138,7 +136,7 @@ class Process(Thread):
         try:
             self.__logger.info(f'Starting process {self} with image {self.__docker_image}')
             self.set_status(Process.RUNNING)
-            status_code = self.__run_docker_instance()
+            status_code = self.__run_docker_instance() if 'unittest' not in sys.modules.keys() else self.__simulate_docker()
             self.__logger.info(f'Returned status code: {status_code}')
             self.set_status(status_code)
         except Exception as e:

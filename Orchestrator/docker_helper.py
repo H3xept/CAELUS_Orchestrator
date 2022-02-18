@@ -1,3 +1,4 @@
+import sys
 import docker
 import logging
 
@@ -28,14 +29,15 @@ class Docker():
         )
 
     def pull_latest_dt(self):
-        try:
-            self.__logger.info('Checking local DT image...')
-            self.client.images.get(f'{self.__creds["serveraddress"]}{Docker.DT_IMAGE}')
-        except:
-            self.__logger.info('Image not present!')
-            self.__logger.info(f'Pulling latest of {Docker.DT_IMAGE} from {self.__creds["serveraddress"]}')
-            self.client.images.pull(f'{self.__creds["serveraddress"]}{Docker.DT_IMAGE}', auth_config=self.__creds)
-            self.__logger.info('Image pulled successfully.')
+        if 'unittest' in sys.modules.keys():
+            try:
+                self.__logger.info('Checking local DT image...')
+                self.client.images.get(f'{self.__creds["serveraddress"]}{Docker.DT_IMAGE}')
+            except:
+                self.__logger.info('Image not present!')
+                self.__logger.info(f'Pulling latest of {Docker.DT_IMAGE} from {self.__creds["serveraddress"]}')
+                self.client.images.pull(f'{self.__creds["serveraddress"]}{Docker.DT_IMAGE}', auth_config=self.__creds)
+                self.__logger.info('Image pulled successfully.')
 
 
 docker_singleton = None

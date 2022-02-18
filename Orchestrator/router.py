@@ -36,6 +36,7 @@ def index():
 def new_process():
     payload = request.get_json()
     payload_valid = validate_payload(payload)
+    print(payload_valid)
     if payload_valid:
         ps:ProcessManager = router.ps
         docker_img = payload['docker_img']
