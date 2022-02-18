@@ -1,9 +1,11 @@
 import pymongo
 from os import environ
+from mongomock import MongoClient as MockMongoClient
+import sys
 
 mongo_uri = 'mongodb://mongo/' if 'IN_DOCKER' in environ else 'mongodb://localhost/'
 print(f'Trying to connect to {mongo_uri}...')
-client = pymongo.MongoClient(mongo_uri)
+client = pymongo.MongoClient(mongo_uri) if 'unittest' not in sys.modules.keys() else MockMongoClient()
 client.admin.command('ping')
 print(f'Connected!')
 

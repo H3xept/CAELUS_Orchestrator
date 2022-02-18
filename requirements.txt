@@ -18,6 +18,7 @@ itsdangerous==2.0.1
 Jinja2==3.0.3
 jsonschema==4.2.1
 MarkupSafe==2.0.1
+mongomock==4.0.0
 packaging==21.3
 passlib==1.7.4
 pluggy==1.0.0
@@ -32,6 +33,7 @@ pytest==7.0.1
 python-dotenv==0.19.2
 pytz==2021.3
 requests==2.26.0
+sentinels==1.0.0
 six==1.16.0
 tomli==2.0.1
 urllib3==1.26.7
