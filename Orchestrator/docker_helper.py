@@ -29,7 +29,7 @@ class Docker():
         )
 
     def pull_latest_dt(self):
-        if 'unittest' in sys.modules.keys():
+        if 'unittest' not in sys.modules.keys():
             try:
                 self.__logger.info('Checking local DT image...')
                 self.client.images.get(f'{self.__creds["serveraddress"]}{Docker.DT_IMAGE}')
