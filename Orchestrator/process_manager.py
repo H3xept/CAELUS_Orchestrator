@@ -135,7 +135,7 @@ class Process(Thread):
             self.set_status(Process.RUNNING)
             status_code = self.__run_docker_instance()
             self.__logger.info(f'Returned status code: {status_code}')
-            self.set_status(status_code)
+            self.set_status(status_code, message=str(self.__error))
         except Exception as e:
             self.__logger.info(f'{self} errored out during startup')
             self.__logger.error(f'{e}')
