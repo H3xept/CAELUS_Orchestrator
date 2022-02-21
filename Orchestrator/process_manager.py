@@ -229,8 +229,6 @@ class ProcessManager():
         self.__ps_queue.put((effective_start_time, _id, docker_image, mission_payload, issuer_id))
         return _id
 
-    def reschedule_process(self, old_p):
-        self.schedule_process(old_p.get_docker_image(), old_p.get_mission_data(), old_p.get_issuer())
     
     def __dequeue_ps(self):
         if self.__ps_running >= self.__max_concurrent_processes:
@@ -260,10 +258,8 @@ class ProcessManager():
                     to_delete.append(pid)
                 elif p.get_status() == Process.ERROR:
                     self.__old_ps[pid] = p
-                    self.__logger.info(f'Process {pid} errored out. Rescheduling...')
                     self.__logger.info(f'\tError: {p.get_error()}')
                     to_delete.append(pid)
-                    self.reschedule_process(p)
                 elif p.get_status() == Process.HALTED:
                     self.__logger.info(f'Process {pid} has been halted.')
                     to_delete.append(pid)
