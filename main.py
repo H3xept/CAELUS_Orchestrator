@@ -3,6 +3,7 @@ logging.basicConfig(level=logging.INFO)
 
 from dotenv import load_dotenv
 load_dotenv()
+
 from os import environ
 from Orchestrator.app import app
 from waitress import serve

@@ -6,8 +6,12 @@ class User():
     @staticmethod
     def authenticate(database, username, password):
         user = retrieve_user(database, username)
-        if user and get_crypto_context().verify(password, user['password']):
-            return user
+        try:
+            if user and get_crypto_context().verify(password, user['password']):
+                return user 
+        except Exception as _:
+            print(f'Failed to authenticate user {username}')
+            return None
     
     def jwt_payload(self):
         return {
