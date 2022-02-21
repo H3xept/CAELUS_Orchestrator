@@ -19,7 +19,7 @@ MAX_CONCURRENT_PROCESSES = 'MAX_CONCURRENT_PROCESSES'
 
 mongo_db = client['caelus']
 router = Blueprint('router', __name__, template_folder='./templates')
-router.ps = ProcessManager(mongo_db, max_concurrent_processes=8 if MAX_CONCURRENT_PROCESSES not in os.environ else os.environ[MAX_CONCURRENT_PROCESSES], logger=logging.getLogger('waitress'))
+router.ps = ProcessManager(mongo_db, max_concurrent_processes=8 if MAX_CONCURRENT_PROCESSES not in os.environ else int(os.environ[MAX_CONCURRENT_PROCESSES]), logger=logging.getLogger('waitress'))
 
 JOBS_GET = '/jobs'
 PENDING_JOBS_GET = '/pending_jobs'
