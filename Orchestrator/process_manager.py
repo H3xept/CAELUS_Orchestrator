@@ -33,6 +33,7 @@ class Process(Thread):
         self.__logger = logger
         self.__should_stop = False
         self.__delegate = status_update_delegate
+        self.__status_message = "No message"
         
     def halt(self):
         self.__should_stop = True
@@ -127,13 +128,6 @@ class Process(Thread):
             self.__logger.error(e)
             self.__error = e
             return Process.ERROR
-        finally:
-            if container is not None:
-                self.__logger.info(f'Terminating container {container}')
-                try:
-                    container.stop(timeout=2)
-                except Exception as e:
-                    self.__logger.error(f'Exception while trying to stop container {e}')
 
     def run(self):
         try:
