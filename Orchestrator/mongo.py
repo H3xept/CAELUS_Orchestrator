@@ -5,7 +5,7 @@ import sys
 
 mongo_uri = 'mongodb://mongo/' if 'IN_DOCKER' in environ else 'mongodb://localhost/'
 print(f'Trying to connect to {mongo_uri}...')
-client = pymongo.MongoClient(mongo_uri) if 'unittest' not in sys.modules.keys() else MockMongoClient()
+client = pymongo.MongoClient(mongo_uri)
 client.admin.command('ping')
 print(f'Connected!')
 
