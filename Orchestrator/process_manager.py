@@ -1,6 +1,6 @@
 import uuid
 import json
-import sys
+import os
 import time
 import logging
 from math import floor
@@ -101,7 +101,9 @@ class Process(Thread):
                     status_code = status['StatusCode'] if 'StatusCode' in status else None
                     self.__logger.info(f'Container exited with status {status_code}')
                     self.__error = error
-                    container.remove()
+                    if 'DELETE_CONTAINERS' in os.environ and os.environ['DELETE_CONTAINERS']:
+                        self.__logger.info('Removing container {container}')
+                        container.remove()
                     return self.__code_to_result(status_code)
                 except Exception:
                     pass
@@ -136,7 +138,7 @@ class Process(Thread):
         try:
             self.__logger.info(f'Starting process {self} with image {self.__docker_image}')
             self.set_status(Process.RUNNING)
-            status_code = self.__run_docker_instance() if 'unittest' not in sys.modules.keys() else self.__simulate_docker()
+            status_code = self.__run_docker_instance()
             self.__logger.info(f'Returned status code: {status_code}')
             self.set_status(status_code)
         except Exception as e:
