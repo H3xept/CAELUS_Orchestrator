@@ -12,6 +12,7 @@ DOCKER_EMAIL=<email for docker registry>
 DOCKER_REGISTRY=ghcr.io
 APP_SECRET=<an appliction secret>
 DEFAULT_ADMIN_PASSWORD=<a default admin password>
+DELETE_CONTAINERS=True
 ```
 
 2. Run `bash start.sh`

@@ -101,7 +101,7 @@ class Process(Thread):
                     status_code = status['StatusCode'] if 'StatusCode' in status else None
                     self.__logger.info(f'Container exited with status {status_code}')
                     self.__error = error
-                    if 'DELETE_CONTAINERS' in os.environ and os.environ['DELETE_CONTAINERS']:
+                    if 'DELETE_CONTAINERS' in os.environ and os.environ['DELETE_CONTAINERS'] == 'True':
                         self.__logger.info('Removing container {container}')
                         container.remove()
                     return self.__code_to_result(status_code)
