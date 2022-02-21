@@ -13,10 +13,13 @@ from .helpers import validate_payload
 from .mongo import client, get_processes_for_user, retrieve_process, store_new_user, user_owns_operation, get_simulation_data, get_operation_id_for_job_id
 import logging
 from .docker_helper import get_docker
+import os
+
+MAX_CONCURRENT_PROCESSES = 'MAX_CONCURRENT_PROCESSES'
 
 mongo_db = client['caelus']
 router = Blueprint('router', __name__, template_folder='./templates')
-router.ps = ProcessManager(mongo_db, max_concurrent_processes=10, logger=logging.getLogger('waitress'))
+router.ps = ProcessManager(mongo_db, max_concurrent_processes=8 if MAX_CONCURRENT_PROCESSES not in os.environ else os.environ[MAX_CONCURRENT_PROCESSES], logger=logging.getLogger('waitress'))
 
 JOBS_GET = '/jobs'
 PENDING_JOBS_GET = '/pending_jobs'

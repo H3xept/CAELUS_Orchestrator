@@ -44,10 +44,11 @@ class Process(Thread):
         return self.__status
 
     def get_status_string(self):
-        return Process.status_to_string(self.__status)
+        return f'{Process.status_to_string(self.__status)} ({self.__status_message})'
 
-    def set_status(self, s):
+    def set_status(self, s, message=None):
         self.__status = s
+        self.__status_message = message
         self.__delegate.process_status_changed(self)
         
     def __simulate_docker(self):
@@ -181,7 +182,7 @@ class Process(Thread):
 
 class ProcessManager():
 
-    def __init__(self, db, max_concurrent_processes = 10, logger=logging.getLogger()):
+    def __init__(self, db, max_concurrent_processes = 8, logger=logging.getLogger()):
         self.__max_concurrent_processes = max_concurrent_processes
         self.__ps_running = 0
         self.__ps_queue = PriorityQueue()

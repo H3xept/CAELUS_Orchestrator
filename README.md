@@ -13,6 +13,7 @@ DOCKER_REGISTRY=ghcr.io
 APP_SECRET=<an appliction secret>
 DEFAULT_ADMIN_PASSWORD=<a default admin password>
 DELETE_CONTAINERS=True
+MAX_CONCURRENT_PROCESSES=8
 ```
 
 2. Run `bash start.sh`
