@@ -7,6 +7,8 @@ def find_missing_keys(data, keys):
     return list(filter(lambda x: x not in data.keys(), keys))
 
 def validate_mission(data):
+    if not isinstance(data, dict):
+        return False
     keys = [
         'waypoints',
         'operation_id',
