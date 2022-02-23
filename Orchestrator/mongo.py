@@ -19,7 +19,7 @@ def store_new_process(database, process):
 
 def update_process_status(database, process):
     flight_data = database[FLIGHT_DATA]
-    query = {'$set':{'status':process.get_status(), 'status_str':process.get_status_string()}}
+    query = {'$set':{'status':process.get_status(), 'status_str':process.get_status_string(), 'error_code':process.get_error_code()}}
     flight_data.update_one({'id':process.get_id()}, query)
 
 def get_processes_for_user(database, user_id):
