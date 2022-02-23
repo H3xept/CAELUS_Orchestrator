@@ -20,37 +20,47 @@ MAX_CONCURRENT_PROCESSES=8
 
 ## Job error types
 `UNDEFINED_ERROR = 1`
-Description: An undefined error occurred.
-Action: Unknown
+An undefined error occurred.
+
+Suggested action: Unknown
 
 `JSON_READ_EC = 2`
-Description: Error while reading the json file
-Action: Fix the json file
+Error while reading the json file
+
+Suggested action: Fix the json file
 
 `MISSION_UPLOAD_FAIL = 3`
-Description: Error while uploading the mission file
-Action: Try again, the server may be overloaded
+Error while uploading the mission file
+
+Suggested action: Try again, the server may be overloaded
 
 `STREAM_READ_FAILURE = 4`
-Description: Error while reading the stream
-Action: Try again, the server may be overloaded
+
+Error while reading the stream
+
+Suggested action: Try again, the server may be overloaded
 
 `VEHICLE_TIMED_OUT = 5`
-Description: The vehicle timed out
-Action: Try again, the server may be overloaded
+The vehicle timed out
+
+Suggested action: Try again, the server may be overloaded
 
 `PREMATURE_LANDING = 6`
-Description: The vehicle landed prematurely
-Action: Wait or check the vehicle's config / payload. There may be too much wind or the vehicle can't control properly.
+The vehicle landed prematurely
+
+Suggested action: Wait or check the vehicle's config / payload. There may be too much wind or the vehicle can't control properly.
 
 `UNKNOWN_VEHICLE = 7`
-Description: The vehicle config is unknown
-Action: Check the vehicle's name in the mission file.
+The vehicle config is unknown
+
+Suggested action: Check the vehicle's name in the mission file.
 
 `PX4_SIM_DESYNC = 8`
-Description: The PX4 simulator is desynced
-Action: Try again, the server may be overloaded
+The PX4 simulator is desynced
+
+Suggested action: Try again, the server may be overloaded
 
 `TOO_MUCH_WIND = 9`
-Description: There is too much wind for the vehicle to control properly
-Action: Wait for better wind conditions
+There is too much wind for the vehicle to control properly
+
+Suggested action: Wait for better wind conditions
