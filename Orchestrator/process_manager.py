@@ -97,11 +97,11 @@ class Process(Thread):
                     self.__logger.info(f'Container {self.__mission_payload["operation_id"]} has been issued a forceful stop.')
                     try:
                         container.stop(timeout=5)
-                        return Process.HALTED
+                        return Process.HALTED, None
                     except docker_lib.errors.APIError as e:
                         self.__logger.error(e)
                         self.__error = e
-                        return Process.ERROR
+                        return Process.ERROR, UNDEFINED_ERROR
                 try:
                     status = container.wait(timeout=3)
                     error = status['Error'] if 'Error' in status else None
@@ -132,7 +132,7 @@ class Process(Thread):
         except Exception as e:
             self.__logger.error(e)
             self.__error = e
-            return Process.ERROR
+            return Process.ERROR, None
 
     def run(self):
         try:
