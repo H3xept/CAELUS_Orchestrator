@@ -45,7 +45,12 @@ def new_process():
         docker_img = payload['docker_img']
         mission_data = payload['mission']
         issuer_username = get_jwt_identity()['username']
-        job_id = ps.schedule_process(docker_img,mission_data,issuer_username)
+        
+        try:
+            job_id = ps.schedule_process(docker_img,mission_data,issuer_username)
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 403)
+
         if job_id is not None:
             return make_response(jsonify({
                 'job_id':job_id

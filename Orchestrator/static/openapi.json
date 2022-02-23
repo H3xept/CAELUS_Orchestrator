@@ -251,6 +251,8 @@ paths:
           description: Not logged in
         '402':
           description: Requested docker image hasn't been found.
+        '403':
+          description: An operation with this ID already exists.
           
   /simulation_data/{job_id}:
     get:

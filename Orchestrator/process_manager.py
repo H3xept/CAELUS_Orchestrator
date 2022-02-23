@@ -229,9 +229,18 @@ class ProcessManager():
         except Exception as e:
             return False
 
+    def __process_with_operation_id(self, operation_id):
+        for p in self.__active_ps.values():
+            if p.get_mission_data()['operation_id'] == operation_id:
+                return p
+        return None
+        
     def schedule_process(self, docker_image, mission_payload, issuer_id):
         if not self.__image_available(docker_image):
             return None
+        if self.__process_with_operation_id(mission_payload['operation_id']) is not None:
+            raise Exception(f'Operation {mission_payload["operation_id"]} already scheduled')
+            
         _id = str(uuid.uuid4())
         effective_start_time = mission_payload['effective_start_time']
         self.__logger.info(f'Enqueueing new process (docker_img: {docker_image}, mission: {mission_payload["operation_id"]}) for {effective_start_time}')
