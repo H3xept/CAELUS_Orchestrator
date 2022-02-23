@@ -83,6 +83,10 @@ class Process(Thread):
             self.__error = Exception('Vehicle has landed before reaching landing spot. Check vehicle configuration!')
         elif exit_code == UNKNOWN_VEHICLE:
             self.__error = Exception('Unknown vehicle model, check available vehicles.')
+        elif exit_code == PX4_SIM_DESYNC:
+            self.__error = Exception('PX4 simulation desync -- server may be overloaded.')
+        elif exit_code == TOO_MUCH_WIND:
+            self.__error = Exception('There is too much wind to fly safely.')
         return Process.ERROR
 
     def __run_docker_instance(self):
