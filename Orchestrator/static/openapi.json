@@ -389,6 +389,10 @@ paths:
                     status_str:
                       type: string
                       enum: [CREATED, RUNNING, ERROR, TERMINATED, HALTED]
+                    error_code:
+                      type: numer
+                      example: 0
+                      description: None for no error. Error codes are described in the Orchestrator's readme file.
                     issuer_id:
                       type: string
                       example: 'admin'
