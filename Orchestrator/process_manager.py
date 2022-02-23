@@ -47,9 +47,10 @@ class Process(Thread):
     def get_status_string(self):
         return f'{Process.status_to_string(self.__status)} ({self.__status_message})'
 
-    def set_status(self, s, message=None):
+    def set_status(self, s, message=None, error_code=None):
         self.__status = s
         self.__status_message = message
+        self.__error_code = error_code
         self.__delegate.process_status_changed(self)
         
     def __simulate_docker(self):
@@ -104,13 +105,13 @@ class Process(Thread):
                 try:
                     status = container.wait(timeout=3)
                     error = status['Error'] if 'Error' in status else None
-                    status_code = status['StatusCode'] if 'StatusCode' in status else None
-                    self.__logger.info(f'Container exited with status {status_code}')
+                    error_code = status['StatusCode'] if 'StatusCode' in status else None
+                    self.__logger.info(f'Container exited with status {error_code}')
                     self.__error = error
                     if 'DELETE_CONTAINERS' in os.environ and os.environ['DELETE_CONTAINERS'] == 'True':
                         self.__logger.info('Removing container {container}')
                         container.remove()
-                    return self.__code_to_result(status_code)
+                    return self.__code_to_result(error_code), error_code if error_code not in [OK, SIGTERM, SIGKILL] else None
                 except Exception:
                     pass
         container = None
@@ -126,8 +127,8 @@ class Process(Thread):
             container.start()
             self.__logger.info(f'Container {container} spawned successfully.')
             self.set_status(Process.RUNNING)
-            status_code = monitor(container)
-            return status_code
+            status_code, error_code = monitor(container)
+            return status_code, error_code
         except Exception as e:
             self.__logger.error(e)
             self.__error = e
@@ -137,9 +138,9 @@ class Process(Thread):
         try:
             self.__logger.info(f'Starting process {self} with image {self.__docker_image}')
             self.set_status(Process.RUNNING)
-            status_code = self.__run_docker_instance()
+            status_code, error_code = self.__run_docker_instance()
             self.__logger.info(f'Returned status code: {status_code}')
-            self.set_status(status_code, message=str(self.__error))
+            self.set_status(status_code, message=str(self.__error), error_code=error_code)
         except Exception as e:
             self.__logger.info(f'{self} errored out during startup')
             self.__logger.error(f'{e}')
@@ -167,6 +168,9 @@ class Process(Thread):
     def get_group_id(self):
         return self.__group_id
 
+    def get_error_code(self):
+        return self.__error_code
+
     def to_dict(self):
         return {
             'id': self.get_id(),
@@ -175,6 +179,7 @@ class Process(Thread):
             'mission_payload': self.get_mission_data(),
             'status': self.get_status(),
             'status_str': self.get_status_string(),
+            'error_code': self.get_error_code(),
             'issuer_id': self.get_issuer()
         }
 
