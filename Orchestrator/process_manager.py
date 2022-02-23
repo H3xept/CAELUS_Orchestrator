@@ -29,6 +29,7 @@ class Process(Thread):
         self.__mission_payload = mission_payload
         self.__docker_image = docker_image
         self.__error = None
+        self.__error_code = None
         self.__created_at = time.time()
         self.__logger = logger
         self.__should_stop = False
@@ -240,7 +241,7 @@ class ProcessManager():
             return None
         if self.__process_with_operation_id(mission_payload['operation_id']) is not None:
             raise Exception(f'Operation {mission_payload["operation_id"]} already scheduled')
-            
+
         _id = str(uuid.uuid4())
         effective_start_time = mission_payload['effective_start_time']
         self.__logger.info(f'Enqueueing new process (docker_img: {docker_image}, mission: {mission_payload["operation_id"]}) for {effective_start_time}')
